@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f2937"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#g)"/>
+  <rect x="170" y="260" rx="40" ry="40" width="860" height="620" fill="#2d3748" stroke="#d1a954" stroke-width="14"/>
+  <circle cx="360" cy="570" r="120" fill="#0f172a" stroke="#d1d5db" stroke-width="8"/>
+  <circle cx="840" cy="570" r="120" fill="#0f172a" stroke="#d1d5db" stroke-width="8"/>
+  <text x="600" y="430" text-anchor="middle" fill="#f9fafb" font-size="64" font-family="Arial" font-weight="700">Marshall Speaker</text>
+  <text x="600" y="965" text-anchor="middle" fill="#fbbf24" font-size="46" font-family="Arial">Loa Bluetooth Marshall</text>
+</svg>
