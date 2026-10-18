@@ -33,9 +33,6 @@ function short_text($text, $max = 70) {
     return mb_substr($text, 0, $max) . '...';
 }
 
-// Ảnh chạy trong dải banner (thêm tên file ảnh trong thư mục image/ nếu muốn)
-$banners = ['banner_apple.png', 'banner_samsung.png', 'banner_apple.png', 'banner_samsung.png'];
-
 $pageTitle = 'Trang chủ - UTH Shop';
 require_once 'includes/header.php';
 ?>
@@ -51,16 +48,11 @@ require_once 'includes/header.php';
         <p>Điện thoại, laptop và phụ kiện công nghệ chính hãng, giá tốt mỗi ngày.</p>
     </section>
 
-    <!-- Dải banner -->
-    <section class="uth-marquee" aria-label="Quảng cáo">
-        <div class="uth-marquee-track">
-            <?php /* In danh sách ảnh 2 lần để vòng lặp liền mạch */ ?>
-            <?php for ($loop = 0; $loop < 2; $loop++): ?>
-                <?php foreach ($banners as $b): ?>
-                    <img src="image/<?= htmlspecialchars($b) ?>" alt="Khuyến mãi UTH Shop" <?= $loop === 1 ? 'aria-hidden="true"' : '' ?>>
-                <?php endforeach; ?>
-            <?php endfor; ?>
-        </div>
+        <!-- Dải banner -->
+    <section class="uth-container">
+        <a href="products.php?search=samsung" class="uth-strip">
+            <img src="image/banner_samsung.png" alt="Khuyến mãi Samsung">
+        </a>
     </section>
 
     <div class="uth-container" style="padding-bottom: 64px;">

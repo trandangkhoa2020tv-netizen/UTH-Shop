@@ -18,24 +18,19 @@ body { background-color: #0b1120 !important; }
     color: #cbd5e1; font-size: 1.4rem; font-weight: 700; margin: 0;
 }
 
-/* ----- Dải banner ----- */
-.uth-marquee { width: 100%; overflow: hidden; margin: 8px 0 40px; }
-.uth-marquee-track {
-    display: flex; width: max-content;
-    animation: uth-scroll 40s linear infinite; /* đổi 40s để chạy nhanh/chậm */
+/* ----- Dải banner Samsung ----- */
+.uth-strip {
+    display: block; overflow: hidden; margin: 8px 0 40px;
+    border-radius: 14px; border: 1px solid #1e293b;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
 }
-.uth-marquee:hover .uth-marquee-track { animation-play-state: paused; }
-.uth-marquee-track img {
-    height: 170px; width: auto; display: block;
-    margin-right: 16px; border-radius: 12px;
-    border: 1px solid #1e293b;
+.uth-strip img {
+    display: block; width: 100%;
+    height: clamp(110px, 15vw, 200px);
+    object-fit: cover; object-position: center;
+    transition: transform .4s;
 }
-@keyframes uth-scroll {
-    from { transform: translateX(-50%); }
-    to   { transform: translateX(0); }
-}
-@media (max-width: 640px) { .uth-marquee-track img { height: 120px; } }
-@media (prefers-reduced-motion: reduce) { .uth-marquee-track { animation: none; } }
+.uth-strip:hover img { transform: scale(1.03); }
 
 /* ----- Danh mục ----- */
 .uth-cats { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 28px; }
