@@ -33,93 +33,76 @@ function short_text($text, $max = 70) {
     return mb_substr($text, 0, $max) . '...';
 }
 
+// Ảnh chạy trong dải banner (thêm tên file ảnh trong thư mục image/ nếu muốn)
+$banners = ['banner_apple.png', 'banner_samsung.png', 'banner_apple.png', 'banner_samsung.png'];
+
 $pageTitle = 'Trang chủ - UTH Shop';
 require_once 'includes/header.php';
 ?>
 
-<!-- Nếu header.php chưa nhúng Tailwind thì bỏ comment dòng dưới -->
-<!-- <script src="https://cdn.tailwindcss.com"></script> -->
-
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/home.css">
 
-<main class="home-wrap max-w-7xl mx-auto px-4 pt-12 pb-16">
+<div class="uth-home">
 
-    <!-- Tiêu Đề -->
-    <section class="text-center mb-10">
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-            Chào mừng đến với <span class="home-title">UTH Shop</span>
-        </h1>
-        <p class="text-slate-400 text-base md:text-lg">
-            Điện thoại, laptop và phụ kiện công nghệ chính hãng, giá tốt mỗi ngày.
-        </p>
+    <!-- Tiêu đề + slogan -->
+    <section class="uth-hero uth-container">
+        <h1>Welcome to <span>UTH Shop</span></h1>
+        <p>Điện thoại, laptop và phụ kiện công nghệ chính hãng, giá tốt mỗi ngày.</p>
     </section>
 
-    <!-- Banner -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-        <a href="products.php?search=iphone" class="block overflow-hidden rounded-2xl border border-slate-800">
-            <img src="image/banner_apple.png" alt="Khuyến mãi Apple"
-                 class="w-full h-44 md:h-60 object-cover hover:scale-105 transition-transform duration-300">
-        </a>
-        <a href="products.php?search=samsung" class="block overflow-hidden rounded-2xl border border-slate-800">
-            <img src="image/banner_samsung.png" alt="Khuyến mãi Samsung"
-                 class="w-full h-44 md:h-60 object-cover hover:scale-105 transition-transform duration-300">
-        </a>
+    <!-- Dải banner -->
+    <section class="uth-marquee" aria-label="Quảng cáo">
+        <div class="uth-marquee-track">
+            <?php /* In danh sách ảnh 2 lần để vòng lặp liền mạch */ ?>
+            <?php for ($loop = 0; $loop < 2; $loop++): ?>
+                <?php foreach ($banners as $b): ?>
+                    <img src="image/<?= htmlspecialchars($b) ?>" alt="Khuyến mãi UTH Shop" <?= $loop === 1 ? 'aria-hidden="true"' : '' ?>>
+                <?php endforeach; ?>
+            <?php endfor; ?>
+        </div>
     </section>
 
-    <!-- Danh Mục -->
-    <?php if (!empty($categories)): ?>
-    <section class="flex flex-wrap items-center justify-center gap-2 mb-8">
-        <a href="products.php" class="px-4 py-2 rounded-full text-sm bg-amber-600 text-white">Tất cả</a>
-        <?php foreach ($categories as $cat): ?>
-            <a href="products.php?category_id=<?= (int)$cat['id'] ?>"
-               class="px-4 py-2 rounded-full text-sm border border-slate-700 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition-colors">
-                <?= htmlspecialchars($cat['name']) ?>
-            </a>
-        <?php endforeach; ?>
-    </section>
-    <?php endif; ?>
+    <div class="uth-container" style="padding-bottom: 64px;">
 
-    <!-- Danh sách sản phẩm -->
-    <section>
+        <!-- Danh mục -->
+        <?php if (!empty($categories)): ?>
+        <nav class="uth-cats">
+            <a href="products.php" class="active">Tất cả</a>
+            <?php foreach ($categories as $cat): ?>
+                <a href="products.php?category_id=<?= (int)$cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></a>
+            <?php endforeach; ?>
+        </nav>
+        <?php endif; ?>
+
+        <!-- Danh sách sản phẩm -->
         <?php if (empty($products)): ?>
-            <p class="text-slate-500 py-16 text-center">
-                Chưa có sản phẩm nào. Hãy import database.sql hoặc thêm sản phẩm trong trang quản trị.
-            </p>
+            <p class="uth-empty">Chưa có sản phẩm nào. Hãy import database.sql hoặc thêm sản phẩm trong trang quản trị.</p>
         <?php else: ?>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="uth-grid">
                 <?php foreach ($products as $i => $p): ?>
-                    <article class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col hover:border-slate-600 transition-colors">
-
+                    <article class="uth-card">
                         <!-- Ảnh + huy hiệu -->
-                        <a href="product_detail.php?id=<?= (int)$p['id'] ?>" class="relative block bg-slate-100">
-                            <?php if ($i < 4): ?>
-                                <span class="absolute top-3 left-3 z-10 bg-teal-500 text-white text-xs font-medium px-2.5 py-1 rounded-md">Mới</span>
-                            <?php endif; ?>
+                        <a href="product_detail.php?id=<?= (int)$p['id'] ?>" class="uth-card-img">
+                            <?php if ($i < 4): ?><span class="uth-badge">Mới</span><?php endif; ?>
                             <img src="<?= htmlspecialchars(product_image($p['image'] ?? '')) ?>"
-                                 alt="<?= htmlspecialchars($p['name']) ?>"
-                                 class="w-full aspect-square object-contain p-6">
+                                 alt="<?= htmlspecialchars($p['name']) ?>">
                         </a>
 
                         <!-- Nội dung -->
-                        <div class="p-4 flex flex-col flex-1">
-                            <h3 class="font-semibold text-white mb-1">
-                                <a href="product_detail.php?id=<?= (int)$p['id'] ?>" class="hover:text-amber-400">
-                                    <?= htmlspecialchars($p['name']) ?>
-                                </a>
+                        <div class="uth-card-body">
+                            <h3>
+                                <a href="product_detail.php?id=<?= (int)$p['id'] ?>"><?= htmlspecialchars($p['name']) ?></a>
                             </h3>
 
                             <?php if (!empty($p['description'])): ?>
-                                <p class="text-sm text-slate-400 mb-3">
-                                    <?= htmlspecialchars(short_text($p['description'])) ?>
-                                </p>
+                                <p class="uth-desc"><?= htmlspecialchars(short_text($p['description'])) ?></p>
                             <?php endif; ?>
 
-                            <div class="flex items-center justify-between mt-auto mb-4">
-                                <span class="text-xl font-bold text-white"><?= format_price($p['price']) ?></span>
+                            <div class="uth-row">
+                                <span class="uth-price"><?= format_price($p['price']) ?></span>
                                 <?php if (!empty($p['category_name'])): ?>
-                                    <span class="text-xs px-2.5 py-1 rounded-md bg-amber-500/15 text-amber-400">
-                                        <?= htmlspecialchars($p['category_name']) ?>
-                                    </span>
+                                    <span class="uth-tag"><?= htmlspecialchars($p['category_name']) ?></span>
                                 <?php endif; ?>
                             </div>
 
@@ -127,8 +110,7 @@ require_once 'includes/header.php';
                             <form action="cart.php" method="POST">
                                 <input type="hidden" name="action" value="add">
                                 <input type="hidden" name="product_id" value="<?= (int)$p['id'] ?>">
-                                <button type="submit"
-                                        class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors">
+                                <button type="submit" class="uth-btn">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
@@ -142,15 +124,10 @@ require_once 'includes/header.php';
                 <?php endforeach; ?>
             </div>
 
-            <div class="text-center mt-10">
-                <a href="products.php"
-                   class="inline-block px-6 py-2.5 rounded-lg border border-slate-700 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition-colors">
-                    Xem tất cả sản phẩm
-                </a>
-            </div>
+            <div class="uth-more"><a href="products.php">Xem tất cả sản phẩm</a></div>
         <?php endif; ?>
-    </section>
 
-</main>
+    </div>
+</div>
 
 <?php require_once 'includes/footer.php'; ?>
