@@ -1,0 +1,88 @@
+/* ----- Nền tối ----- */
+body { background-color: #0b1120 !important; }
+
+.uth-home { font-family: 'DM Sans', system-ui, sans-serif; color: #e2e8f0; }
+.uth-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+/* ----- Tiêu đề + slogan ----- */
+.uth-hero { text-align: center; padding: 48px 0 24px; }
+.uth-hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700; color: #fff; margin: 0 0 12px;
+}
+.uth-hero h1 span {
+    background: linear-gradient(90deg, #f59e0b, #14b8a6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.uth-hero p {
+    color: #cbd5e1; font-size: 1.4rem; font-weight: 700; margin: 0;
+}
+
+/* ----- Dải banner ----- */
+.uth-marquee { width: 100%; overflow: hidden; margin: 8px 0 40px; }
+.uth-marquee-track {
+    display: flex; width: max-content;
+    animation: uth-scroll 40s linear infinite; /* đổi 40s để chạy nhanh/chậm */
+}
+.uth-marquee:hover .uth-marquee-track { animation-play-state: paused; }
+.uth-marquee-track img {
+    height: 170px; width: auto; display: block;
+    margin-right: 16px; border-radius: 12px;
+    border: 1px solid #1e293b;
+}
+@keyframes uth-scroll {
+    from { transform: translateX(-50%); }
+    to   { transform: translateX(0); }
+}
+@media (max-width: 640px) { .uth-marquee-track img { height: 120px; } }
+@media (prefers-reduced-motion: reduce) { .uth-marquee-track { animation: none; } }
+
+/* ----- Danh mục ----- */
+.uth-cats { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 28px; }
+.uth-cats a {
+    padding: 8px 16px; border-radius: 999px; font-size: .9rem; text-decoration: none;
+    border: 1px solid #334155; color: #cbd5e1; transition: .2s;
+}
+.uth-cats a:hover { border-color: #f59e0b; color: #fbbf24; }
+.uth-cats a.active { background: #d97706; border-color: #d97706; color: #fff; }
+
+/* ----- Lưới sản phẩm ----- */
+.uth-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+@media (max-width: 1024px) { .uth-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .uth-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .uth-grid { grid-template-columns: 1fr; } }
+
+.uth-card {
+    background: #111a2e; border: 1px solid #1e293b; border-radius: 16px;
+    overflow: hidden; display: flex; flex-direction: column; transition: border-color .2s;
+}
+.uth-card:hover { border-color: #475569; }
+.uth-card-img { position: relative; display: block; background: #f1f5f9; }
+.uth-card-img img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; padding: 20px; display: block; }
+.uth-badge {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    background: #14b8a6; color: #fff; font-size: .75rem; font-weight: 500;
+    padding: 4px 10px; border-radius: 6px;
+}
+.uth-card-body { padding: 16px; display: flex; flex-direction: column; flex: 1; }
+.uth-card-body h3 { font-size: 1rem; font-weight: 600; margin: 0 0 6px; }
+.uth-card-body h3 a { color: #fff; text-decoration: none; }
+.uth-card-body h3 a:hover { color: #fbbf24; }
+.uth-desc { font-size: .875rem; color: #94a3b8; margin: 0 0 12px; }
+.uth-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; margin-bottom: 14px; gap: 8px; }
+.uth-price { font-size: 1.2rem; font-weight: 700; color: #fff; }
+.uth-tag { font-size: .75rem; padding: 4px 10px; border-radius: 6px; background: rgba(245,158,11,.15); color: #fbbf24; }
+.uth-btn {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px; border: 0; border-radius: 8px; cursor: pointer;
+    background: #d97706; color: #fff; font-size: .9rem; font-weight: 500; font-family: inherit; transition: .2s;
+}
+.uth-btn:hover { background: #f59e0b; }
+
+.uth-more { text-align: center; margin-top: 36px; }
+.uth-more a {
+    display: inline-block; padding: 10px 24px; border-radius: 8px; text-decoration: none;
+    border: 1px solid #334155; color: #cbd5e1; transition: .2s;
+}
+.uth-more a:hover { border-color: #f59e0b; color: #fbbf24; }
+.uth-empty { text-align: center; color: #64748b; padding: 60px 0; }
