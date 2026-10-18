@@ -1,9 +1,7 @@
 <?php
 require_once 'config/database.php';
 
-$products   = [];
-$categories = [];
-
+// SQL truy vấn sản phẩm nổi bật
 $sqlProducts = "SELECT p.*, c.name AS category_name
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
@@ -11,17 +9,8 @@ $sqlProducts = "SELECT p.*, c.name AS category_name
                 LIMIT 8";
 $sqlCategories = "SELECT * FROM categories ORDER BY id ASC";
 
-if (isset($pdo)) {
-    // --- PDO ---
-    $products   = $pdo->query($sqlProducts)->fetchAll(PDO::FETCH_ASSOC);
-    $categories = $pdo->query($sqlCategories)->fetchAll(PDO::FETCH_ASSOC);
-} elseif (isset($conn)) {
-    // --- MySQLi ---
-    $rs = $conn->query($sqlProducts);
-    while ($row = $rs->fetch_assoc()) { $products[] = $row; }
-    $rs = $conn->query($sqlCategories);
-    while ($row = $rs->fetch_assoc()) { $categories[] = $row; }
-}
+$products   = $conn->query($sqlProducts)->fetchAll(PDO::FETCH_ASSOC);
+$categories = $conn->query($sqlCategories)->fetchAll(PDO::FETCH_ASSOC);
 
 // 15990000 -> 15.990.000đ
 function format_price($price) {
