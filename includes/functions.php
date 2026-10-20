@@ -148,11 +148,57 @@ function orderStatusClass($status) {
  * @param string $basePath  Thư mục chứa ảnh (relative từ root)
  * @return string
  */
-function getProductImage($filename, $basePath = 'image/') {
-    $default = $basePath . 'no-image.png';
-    if (empty($filename)) return $default;
-    $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/Web/' . $basePath . $filename;
-    return file_exists($fullPath) ? $basePath . $filename : $default;
+function getStoredImageUrl($filename, $allowedDirectories = ['image/', 'uploads/products/'], $fallback = '/Web/image/no-image.svg') {
+    $filename = str_replace('\\', '/', trim((string)$filename));
+    $filename = ltrim($filename, '/');
+
+    if ($filename !== '' && strpos($filename, '..') === false) {
+        if (strpos($filename, '/') === false) {
+            $filename = 'image/' . $filename;
+        }
+
+        foreach ($allowedDirectories as $directory) {
+            if (strpos($filename, $directory) === 0) {
+                $fullPath = dirname(__DIR__) . '/' . $filename;
+                if (is_file($fullPath)) {
+                    return '/Web/' . str_replace('%2F', '/', rawurlencode($filename));
+                }
+                if ($directory === 'image/') {
+                    $requestedName = basename($filename);
+                    $requestedExtension = strtolower(pathinfo($requestedName, PATHINFO_EXTENSION));
+                    $requestedSlug = createSlug(str_replace('_', ' ', pathinfo($requestedName, PATHINFO_FILENAME)));
+                    $imageDirectory = dirname(__DIR__) . '/image';
+                    foreach (glob($imageDirectory . '/*') ?: [] as $candidate) {
+                        if (!is_file($candidate) || strtolower(pathinfo($candidate, PATHINFO_EXTENSION)) !== $requestedExtension) {
+                            continue;
+                        }
+                        $candidateSlug = createSlug(str_replace('_', ' ', pathinfo($candidate, PATHINFO_FILENAME)));
+                        if ($candidateSlug === $requestedSlug) {
+                            $relativePath = 'image/' . basename($candidate);
+                            return '/Web/' . str_replace('%2F', '/', rawurlencode($relativePath));
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    return $fallback;
+}
+
+/**
+ * Trả về URL ảnh sản phẩm; hỗ trợ tên file cũ trong image/ và ảnh tải lên.
+ */
+function getProductImage($filename, $basePath = null) {
+    return getStoredImageUrl($filename, ['image/', 'uploads/products/']);
+}
+
+/**
+ * Trả về URL ảnh banner; chỉ chấp nhận ảnh mặc định hoặc ảnh tải lên dành cho banner.
+ */
+function getBannerImage($filename) {
+    return getStoredImageUrl($filename, ['image/', 'uploads/banners/'], '');
 }
 
 /**

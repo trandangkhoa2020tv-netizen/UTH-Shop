@@ -19,22 +19,22 @@
                     <i class="bi bi-shop fs-3 text-primary"></i>
                     <span class="fs-4 fw-bold">UTH <span class="text-primary">Shop</span></span>
                 </div>
-                <p class="text-muted small lh-lg">
+                <p class="footer-description small lh-lg">
                     Website mua sắm trực tuyến được xây dựng bởi sinh viên Trường Đại học Giao thông Vận tải TP.HCM (UTH).
                     Cung cấp các sản phẩm chất lượng với giá cả hợp lý.
                 </p>
                 <!-- Mạng xã hội -->
                 <div class="social-links d-flex gap-3 mt-3">
-                    <a href="#" class="text-muted fs-5 social-icon" title="Facebook" id="footer-facebook">
+                    <a href="#" class="fs-5 social-icon" title="Facebook" id="footer-facebook">
                         <i class="bi bi-facebook"></i>
                     </a>
-                    <a href="#" class="text-muted fs-5 social-icon" title="Instagram" id="footer-instagram">
+                    <a href="#" class="fs-5 social-icon" title="Instagram" id="footer-instagram">
                         <i class="bi bi-instagram"></i>
                     </a>
-                    <a href="#" class="text-muted fs-5 social-icon" title="YouTube" id="footer-youtube">
+                    <a href="#" class="fs-5 social-icon" title="YouTube" id="footer-youtube">
                         <i class="bi bi-youtube"></i>
                     </a>
-                    <a href="#" class="text-muted fs-5 social-icon" title="GitHub" id="footer-github">
+                    <a href="#" class="fs-5 social-icon" title="GitHub" id="footer-github">
                         <i class="bi bi-github"></i>
                     </a>
                 </div>
@@ -68,23 +68,33 @@
             <div class="col-lg-4 col-md-6">
                 <h6 class="footer-heading text-uppercase fw-semibold mb-3">Liên hệ</h6>
                 <ul class="list-unstyled footer-contact">
-                    <li class="d-flex align-items-start gap-2 mb-2">
-                        <i class="bi bi-geo-alt-fill text-primary mt-1 flex-shrink-0"></i>
-                        <span class="text-muted small">
-                            70 Tô Ký, Tân Chánh Hiệp, Quận 12, TP. Hồ Chí Minh
+                    <li class="d-flex align-items-start gap-2 mb-3">
+                        <span class="footer-contact__icon"><i class="bi bi-geo-alt-fill"></i></span>
+                        <span class="footer-contact__content">
+                            <span class="footer-contact__label">Địa chỉ</span>
+                            <span class="footer-contact__value">Số 2 Võ Oanh P. Thạnh Mỹ Tây TP.Hồ Chí Minh </span>
                         </span>
                     </li>
-                    <li class="d-flex align-items-center gap-2 mb-2">
-                        <i class="bi bi-telephone-fill text-primary flex-shrink-0"></i>
-                        <a href="tel:+84900000000" class="text-muted small" id="footer-phone">(+84) 900 000 000</a>
+                    <li class="d-flex align-items-start gap-2 mb-3">
+                        <span class="footer-contact__icon"><i class="bi bi-telephone-fill"></i></span>
+                        <span class="footer-contact__content">
+                            <span class="footer-contact__label">Điện thoại</span>
+                            <a href="tel:+84900000000" class="footer-contact__value" id="footer-phone">(+84) 900 000 000</a>
+                        </span>
                     </li>
-                    <li class="d-flex align-items-center gap-2 mb-2">
-                        <i class="bi bi-envelope-fill text-primary flex-shrink-0"></i>
-                        <a href="mailto:contact@uthshop.vn" class="text-muted small" id="footer-email">contact@uthshop.vn</a>
+                    <li class="d-flex align-items-start gap-2 mb-3">
+                        <span class="footer-contact__icon"><i class="bi bi-envelope-fill"></i></span>
+                        <span class="footer-contact__content">
+                            <span class="footer-contact__label">Email</span>
+                            <a href="mailto:contact@uthshop.vn" class="footer-contact__value" id="footer-email">contact@uthshop.vn</a>
+                        </span>
                     </li>
-                    <li class="d-flex align-items-center gap-2">
-                        <i class="bi bi-clock-fill text-primary flex-shrink-0"></i>
-                        <span class="text-muted small">Thứ 2 – Thứ 7: 8:00 – 21:00</span>
+                    <li class="d-flex align-items-start gap-2">
+                        <span class="footer-contact__icon"><i class="bi bi-clock-fill"></i></span>
+                        <span class="footer-contact__content">
+                            <span class="footer-contact__label">Giờ làm việc</span>
+                            <span class="footer-contact__value">Thứ 2 – Thứ 7: 8:00 – 21:00</span>
+                        </span>
                     </li>
                 </ul>
             </div>
@@ -97,12 +107,12 @@
         <!-- Bottom bar -->
         <div class="row align-items-center">
             <div class="col-md-6">
-                <p class="text-muted small mb-0">
+                <p class="footer-meta small mb-0">
                     &copy; <?= date('Y') ?> <strong>UTH Shop</strong>. Dự án học tập – Môn Lập trình Web.
                 </p>
             </div>
             <div class="col-md-6 text-md-end">
-                <p class="text-muted small mb-0">
+                <p class="footer-meta small mb-0">
                     Trường ĐH Giao thông Vận tải TP.HCM &nbsp;|&nbsp;
                     Được xây dựng bằng PHP &amp; MySQL
                 </p>
@@ -121,7 +131,7 @@
 <!-- Bootstrap 5 JS Bundle (bao gồm Popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- JavaScript chính -->
-<script src="/Web/assets/js/main.js"></script>
+<script src="/Web/assets/js/main.js?v=<?= filemtime(__DIR__ . '/../assets/js/main.js') ?>"></script>
 
 </body>
 </html>

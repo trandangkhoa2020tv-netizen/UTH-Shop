@@ -168,6 +168,101 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ----------------------------------------
+    // 11. HOMEPAGE BANNER CAROUSEL
+    // ----------------------------------------
+    document.querySelectorAll('[data-banner-carousel]').forEach(function (carousel) {
+        const track = carousel.querySelector('.uth-carousel__track');
+        const slides = Array.from(carousel.querySelectorAll('.uth-carousel__slide'));
+        const indicators = Array.from(carousel.querySelectorAll('[data-banner-indicator]'));
+        const previousButton = carousel.querySelector('[data-banner-previous]');
+        const nextButton = carousel.querySelector('[data-banner-next]');
+
+        if (!track || slides.length < 2) return;
+
+        let currentIndex = 0;
+        let timer;
+
+        function showSlide(index) {
+            currentIndex = (index + slides.length) % slides.length;
+            track.style.transform = 'translateX(' + (currentIndex * 100) + '%)';
+            slides.forEach(function (slide, slideIndex) {
+                const isActive = slideIndex === currentIndex;
+                slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+                slide.inert = !isActive;
+            });
+            indicators.forEach(function (indicator, indicatorIndex) {
+                indicator.setAttribute('aria-current', indicatorIndex === currentIndex ? 'true' : 'false');
+            });
+        }
+
+        function stopAutoplay() {
+            window.clearInterval(timer);
+        }
+
+        function startAutoplay() {
+            stopAutoplay();
+            if (!document.hidden && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                timer = window.setInterval(function () {
+                    showSlide(currentIndex + 1);
+                }, 5000);
+            }
+        }
+
+        if (previousButton) {
+            previousButton.addEventListener('click', function () {
+                showSlide(currentIndex - 1);
+                startAutoplay();
+            });
+        }
+        if (nextButton) {
+            nextButton.addEventListener('click', function () {
+                showSlide(currentIndex + 1);
+                startAutoplay();
+            });
+        }
+        indicators.forEach(function (indicator) {
+            indicator.addEventListener('click', function () {
+                showSlide(Number(indicator.getAttribute('data-banner-indicator')));
+                startAutoplay();
+            });
+        });
+
+        carousel.addEventListener('mouseenter', stopAutoplay);
+        carousel.addEventListener('mouseleave', startAutoplay);
+        carousel.addEventListener('focusin', stopAutoplay);
+        carousel.addEventListener('focusout', function (event) {
+            if (!carousel.contains(event.relatedTarget)) startAutoplay();
+        });
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) stopAutoplay();
+            else startAutoplay();
+        });
+        showSlide(0);
+        startAutoplay();
+    });
+
+    const bannerFileInput = document.getElementById('images');
+    const bannerUploadSummary = document.getElementById('banner-upload-summary');
+    const bannerUploadButton = document.querySelector('[data-banner-upload-submit]');
+    if (bannerFileInput && bannerUploadSummary && bannerUploadButton) {
+        bannerFileInput.addEventListener('change', function () {
+            const files = Array.from(bannerFileInput.files || []);
+            const totalBytes = files.reduce(function (total, file) {
+                return total + file.size;
+            }, 0);
+            const totalMegabytes = (totalBytes / (1024 * 1024)).toFixed(1);
+            const isWithinLimits = files.length > 0 && files.length <= 10 && totalBytes <= 30 * 1024 * 1024;
+
+            bannerUploadSummary.textContent = files.length
+                ? files.length + ' ảnh đã chọn · ' + totalMegabytes + ' MB tổng'
+                : 'Chưa chọn ảnh.';
+            bannerUploadSummary.classList.toggle('text-danger', files.length > 0 && !isWithinLimits);
+            bannerUploadSummary.classList.toggle('text-primary', files.length === 0 || isWithinLimits);
+            bannerUploadButton.disabled = files.length > 0 && !isWithinLimits;
+        });
+    }
+
+    // ----------------------------------------
     // 10. FORMAT GIÁ INPUT (admin — tự thêm dấu chấm)
     // ----------------------------------------
     document.querySelectorAll('input[data-format="price"]').forEach(function (input) {

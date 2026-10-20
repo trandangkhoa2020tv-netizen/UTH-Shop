@@ -40,7 +40,7 @@ $cartCount = getCartCount();
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS chính -->
-    <link href="/Web/assets/css/style.css" rel="stylesheet">
+    <link href="/Web/assets/css/style.css?v=<?= filemtime($root . '/assets/css/style.css') ?>" rel="stylesheet">
 </head>
 <body>
 
@@ -49,9 +49,8 @@ $cartCount = getCartCount();
     <div class="container">
 
         <!-- LOGO -->
-        <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="/Web/index.php">
-            <i class="bi bi-shop fs-4"></i>
-            <span>UTH <span class="text-dark">Shop</span></span>
+        <a class="navbar-brand d-flex align-items-center" href="/Web/index.php" aria-label="UTH - Trang chủ">
+            <img class="navbar-brand__logo" src="/Web/image/logouthh.jpg" alt="UTH">
         </a>
 
         <!-- TOGGLE (mobile) -->
@@ -116,6 +115,13 @@ $cartCount = getCartCount();
                         <span class="d-none d-lg-inline"><?= htmlspecialchars($_SESSION['user_name'] ?? 'Tài khoản', ENT_QUOTES, 'UTF-8') ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                        <?php if (isAdmin()): ?>
+                        <li>
+                            <a class="dropdown-item" href="/Web/admin/index.php">
+                                <i class="bi bi-speedometer2 me-2"></i>Quản trị cửa hàng
+                            </a>
+                        </li>
+                        <?php endif; ?>
                         <li>
                             <a class="dropdown-item" href="/Web/orders.php" id="link-orders">
                                 <i class="bi bi-bag-check me-2"></i>Đơn hàng của tôi

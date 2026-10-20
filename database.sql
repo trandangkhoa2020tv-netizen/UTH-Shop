@@ -34,6 +34,26 @@ CREATE TABLE IF NOT EXISTS products (
     CONSTRAINT fk_products_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS site_banners (
+    id TINYINT UNSIGNED PRIMARY KEY,
+    title VARCHAR(150) NOT NULL DEFAULT 'Khuyến mãi',
+    image VARCHAR(255) DEFAULT NULL,
+    link_url VARCHAR(500) NOT NULL DEFAULT '/Web/products.php',
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS site_banner_slides (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL DEFAULT 'Khuyến mãi',
+    image VARCHAR(255) NOT NULL,
+    link_url VARCHAR(500) NOT NULL DEFAULT '/Web/products.php',
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -76,13 +96,13 @@ INSERT INTO products (category_id, name, brand, cpu, ram, description, price, st
 (1, 'iPhone 13', 'Apple', NULL, NULL, 'Điện thoại Apple iPhone 13, thiết kế sang trọng, hiệu năng ổn định.', 15990000, 10, 'iphone13.jpg'),
 (1, 'Samsung Galaxy S23', 'Samsung', NULL, NULL, 'Điện thoại Samsung cao cấp với màn hình đẹp và camera tốt.', 18990000, 8, 's23.jpg'),
 (2, 'MacBook Air M2', 'Apple', 'M2', '8GB', 'Laptop mỏng nhẹ, pin lâu, phù hợp học tập và làm việc.', 28990000, 5, 'macbookairm2.jpg'),
-(2, 'Dell XPS 13', 'Dell', 'i7', '16GB', 'Laptop cao cấp màn hình vô cực, mỏng nhẹ nhất thế giới.', 35000000, 3, 'Dell XPS 13.webp'),
-(2, 'HP Spectre x360', 'HP', 'i7', '16GB', 'Laptop xoay gập 360 độ, thiết kế sang trọng đẳng cấp.', 32000000, 4, 'HP Spectre x360.webp'),
-(2, 'ASUS ROG Zephyrus', 'ASUS', 'i9', '32GB', 'Laptop Gaming đỉnh cao, màn hình 165Hz chuyên game.', 45000000, 2, 'ASUS ROG Zephyrus.webp'),
+(2, 'Dell XPS 13', 'Dell', 'i7', '16GB', 'Laptop cao cấp màn hình vô cực, mỏng nhẹ nhất thế giới.', 35000000, 3, 'Dell_XPS_13.webp'),
+(2, 'HP Spectre x360', 'HP', 'i7', '16GB', 'Laptop xoay gập 360 độ, thiết kế sang trọng đẳng cấp.', 32000000, 4, 'HP_Spectre_x360.webp'),
+(2, 'ASUS ROG Zephyrus', 'ASUS', 'i9', '32GB', 'Laptop Gaming đỉnh cao, màn hình 165Hz chuyên game.', 45000000, 2, 'ASUS_ROG_Zephyrus.webp'),
 (3, 'Tai nghe Bluetooth', 'Sony', NULL, NULL, 'Tai nghe không dây tiện lợi, âm thanh rõ ràng.', 990000, 20, 'tainghe.jpg'),
-(4, 'Loa Bluetooth Marshall', 'Marshall', NULL, NULL, 'Âm thanh cực đỉnh, phong cách retro đẳng cấp.', 5500000, 12, 'Loa Bluetooth Marshall.webp'),
-(5, 'Apple Watch Series 9', 'Apple', NULL, NULL, 'Theo dõi sức khỏe chuyên sâu, thiết kế thời thượng.', 10500000, 15, 'Apple Watch Series 9.webp'),
-(6, 'Màn hình Dell UltraSharp', 'Dell', NULL, NULL, 'Độ phân giải 4K, màu sắc chuẩn xác cho đồ họa.', 8200000, 7, 'Màn hình Dell UltraSharp.webp'),
+(4, 'Loa Bluetooth Marshall', 'Marshall', NULL, NULL, 'Âm thanh cực đỉnh, phong cách retro đẳng cấp.', 5500000, 12, 'Loa_Bluetooth_Marshall.webp'),
+(5, 'Apple Watch Series 9', 'Apple', NULL, NULL, 'Theo dõi sức khỏe chuyên sâu, thiết kế thời thượng.', 10500000, 15, 'Apple_Watch_Series_9.webp'),
+(6, 'Màn hình Dell UltraSharp', 'Dell', NULL, NULL, 'Độ phân giải 4K, màu sắc chuẩn xác cho đồ họa.', 8200000, 7, 'Man_hinh_Dell_UltraSharp.webp'),
 (7, 'Tivi Sony 4K 55 inch', 'Sony', NULL, NULL, 'Hình ảnh sắc nét, âm thanh vòm sống động.', 14500000, 4, 'TV_sony_4k.jpg');
 
 INSERT INTO users (full_name, email, password, phone, address, role)
