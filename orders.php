@@ -11,29 +11,46 @@ $userId = $_SESSION['user']['id'];
 
 // Trạng thái trong DB -> [nhãn tiếng Việt, màu badge Bootstrap]
 function statusInfo($status) {
-    return match ($status) {
-        'Pending'   => ['Đang xử lý', 'warning text-dark'],
-        'Shipping'  => ['Đang giao',  'primary'],
-        'Completed' => ['Đã giao',    'success'],
-        'Cancelled' => ['Đã hủy',     'danger'],
-        default     => [$status,      'secondary'],
+    return match (strtolower((string)$status)) {
+        'pending', 'processing' => ['Đang xử lý', 'warning text-dark'],
+        'shipping'              => ['Đang giao',  'primary'],
+        'completed'             => ['Đã giao',    'success'],
+        'cancelled'             => ['Đã hủy',     'danger'],
+        default                 => [$status,      'secondary'],
     };
+}
+
+function shippingInfo($shippingAddress) {
+    $lines = preg_split('/\r\n|\r|\n/', (string)$shippingAddress);
+    $recipient = '';
+    if (isset($lines[0]) && str_starts_with($lines[0], 'Người nhận:')) {
+        $recipient = trim(substr(array_shift($lines), strlen('Người nhận:')));
+    }
+
+    return [$recipient, trim(implode("\n", $lines))];
 }
 
 // Chi tiết 1 đơn (chỉ đơn của chính user này)
 $detailOrder = null;
 $items = [];
 if (isset($_GET['id'])) {
-    $stmt = $conn->prepare("SELECT * FROM orders WHERE id = ? AND user_id = ?");
+    $stmt = $conn->prepare(
+        "SELECT id, user_id, total_amount, status, shipping_address, phone, created_at
+         FROM orders WHERE id = ? AND user_id = ?"
+    );
     $stmt->execute([(int)$_GET['id'], $userId]);
     $detailOrder = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($detailOrder) {
+        [$recipient, $deliveryAddress] = shippingInfo($detailOrder['shipping_address']);
+        $detailOrder['recipient'] = $recipient;
+        $detailOrder['delivery_address'] = $deliveryAddress;
+
         $stmt = $conn->prepare(
-            "SELECT od.quantity, od.price, p.name, p.image
-             FROM order_details od
-             LEFT JOIN products p ON p.id = od.product_id
-             WHERE od.order_id = ?"
+            "SELECT oi.quantity, oi.price, p.name, p.image
+             FROM order_items oi
+             LEFT JOIN products p ON p.id = oi.product_id
+             WHERE oi.order_id = ?"
         );
         $stmt->execute([$detailOrder['id']]);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,9 +77,9 @@ require_once __DIR__ . '/includes/header.php';
                         <h2 class="h5 mb-0">Chi tiết đơn #<?= $detailOrder['id'] ?></h2>
                         <a href="orders.php" class="small">← Quay lại</a>
                     </div>
-                    <p class="mb-1">Người nhận: <strong><?= htmlspecialchars($detailOrder['fullname']) ?></strong>
+                    <p class="mb-1">Người nhận: <strong><?= htmlspecialchars($detailOrder['recipient']) ?></strong>
                         - <?= htmlspecialchars($detailOrder['phone']) ?></p>
-                    <p class="mb-1">Địa chỉ: <?= htmlspecialchars($detailOrder['address']) ?></p>
+                    <p class="mb-1">Địa chỉ: <?= nl2br(htmlspecialchars($detailOrder['delivery_address'])) ?></p>
                     <p class="mb-3">Trạng thái: <span class="badge bg-<?= $color ?>"><?= $label ?></span></p>
 
                     <div class="table-responsive">
@@ -94,7 +111,7 @@ require_once __DIR__ . '/includes/header.php';
                         </table>
                     </div>
                     <p class="text-end fs-5 fw-bold mb-0">
-                        Tổng: <?= number_format($detailOrder['total_price'], 0, ',', '.') ?>đ
+                        Tổng: <?= number_format($detailOrder['total_amount'], 0, ',', '.') ?>đ
                     </p>
                 </div>
             </div>
@@ -120,12 +137,12 @@ require_once __DIR__ . '/includes/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($orders as $o): [$label, $color] = statusInfo($o['status']); ?>
+                    <?php foreach ($orders as $o): [$label, $color] = statusInfo($o['status']); [$recipient] = shippingInfo($o['shipping_address']); ?>
                         <tr>
                             <td class="fw-semibold">#<?= $o['id'] ?></td>
-                            <td><?= htmlspecialchars($o['fullname']) ?></td>
+                            <td><?= htmlspecialchars($recipient) ?></td>
                             <td><span class="badge bg-<?= $color ?>"><?= $label ?></span></td>
-                            <td><?= number_format($o['total_price'], 0, ',', '.') ?>đ</td>
+                            <td><?= number_format($o['total_amount'], 0, ',', '.') ?>đ</td>
                             <td><?= date('d/m/Y H:i', strtotime($o['created_at'])) ?></td>
                             <td><a href="orders.php?id=<?= $o['id'] ?>" class="btn btn-sm btn-outline-primary">Xem</a></td>
                         </tr>
