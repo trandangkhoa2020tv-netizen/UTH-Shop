@@ -7,7 +7,7 @@ body { background-color: #f8fafc !important; }
     font-family: 'DM Sans', system-ui, sans-serif;
     color: #1e293b;
 }
-.uth-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.uth-container { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
 
 /* ----- Tiêu đề + slogan ----- */
 .uth-hero { text-align: center; padding: 48px 0 32px; }
@@ -112,25 +112,76 @@ body { background-color: #f8fafc !important; }
     .uth-carousel__track { transition: none; }
 }
 
-/* ----- Danh mục ----- */
-.uth-cats { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 28px; }
-.uth-cats a {
-    padding: 8px 16px; border-radius: 999px; font-size: .9rem; text-decoration: none;
-    border: 1px solid #dbe3ef; background: #fff; color: #475569; transition: .2s;
+.uth-catalog-panel {
+    padding: 22px;
+    border: 2px solid #93c5fd;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .72);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, .07);
 }
-.uth-cats a:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
-.uth-cats a.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+/* ----- Danh mục ----- */
+.uth-cats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    padding: 4px 2px 10px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+.uth-cat-link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-height: 54px;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px 7px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #fff;
+    color: #334155;
+    font-size: .92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color .2s, background-color .2s, color .2s, box-shadow .2s;
+}
+.uth-cat-link:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+    color: #1d4ed8;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, .08);
+}
+.uth-cat-icon {
+    display: grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #2563eb;
+    font-size: 1.1rem;
+}
+.uth-cat-link.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+.uth-cat-link.active .uth-cat-icon {
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+}
 
 /* ----- Lưới sản phẩm ----- */
-.uth-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-@media (max-width: 1024px) { .uth-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px)  { .uth-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px)  { .uth-grid { grid-template-columns: 1fr; } }
+.uth-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 991.98px) { .uth-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767.98px) { .uth-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
 
 .uth-card {
     background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
-    overflow: hidden; display: flex; flex-direction: column;
+    overflow: hidden; display: flex; flex-direction: column; height: 100%;
     transition: border-color .2s, box-shadow .2s, transform .2s;
 }
 .uth-card:hover {
@@ -138,32 +189,37 @@ body { background-color: #f8fafc !important; }
     box-shadow: 0 12px 28px rgba(37, 99, 235, .12);
     transform: translateY(-3px);
 }
-.uth-card-img { position: relative; display: block; background: #f1f5f9; }
-.uth-card-img img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; padding: 20px; display: block; }
+.uth-card-img { position: relative; display: block; overflow: hidden; background: #f3f4f6; aspect-ratio: 4 / 3; }
+.uth-card-img img { width: 100%; height: 100%; object-fit: contain; padding: 14px; display: block; transition: transform .25s ease; }
+.uth-card:hover .uth-card-img img { transform: scale(1.02); }
 .uth-badge {
     position: absolute; top: 12px; left: 12px; z-index: 2;
     background: #dbeafe; color: #1d4ed8; font-size: .75rem; font-weight: 600;
     padding: 4px 10px; border-radius: 6px;
 }
-.uth-card-body { padding: 16px; display: flex; flex-direction: column; flex: 1; }
-.uth-card-body h3 { font-size: 1rem; font-weight: 600; margin: 0 0 6px; }
+.uth-card-body { padding: 1rem; display: flex; flex-direction: column; flex: 1; gap: .4rem; }
+.uth-card-body h3 { font-size: .95rem; font-weight: 600; margin: 0; }
 .uth-card-body h3 a { color: #1e293b; text-decoration: none; }
 .uth-card-body h3 a:hover { color: #2563eb; }
-.uth-desc { font-size: .875rem; color: #64748b; margin: 0 0 12px; }
-.uth-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; margin-bottom: 14px; gap: 8px; }
-.uth-price { font-size: 1.2rem; font-weight: 700; color: #1d4ed8; }
-.uth-tag { font-size: .75rem; padding: 4px 10px; border-radius: 6px; background: #eff6ff; color: #1e40af; }
+.uth-desc { font-size: .85rem; color: #64748b; margin: 0; }
+.uth-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; margin-bottom: .5rem; gap: 8px; }
+.uth-price { font-size: 1.1rem; font-weight: 700; color: #1d4ed8; }
+.uth-tag { font-size: .7rem; padding: 4px 8px; border-radius: 6px; background: #eff6ff; color: #1e40af; }
 .uth-btn {
     width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 10px; border: 0; border-radius: 8px; cursor: pointer;
+    padding: .55rem; border: 0; border-radius: 8px; cursor: pointer;
     background: #2563eb; color: #fff; font-size: .9rem; font-weight: 600; font-family: inherit; transition: .2s;
 }
 .uth-btn:hover { background: #1d4ed8; }
 
-.uth-more { text-align: center; margin-top: 36px; }
+.uth-more { text-align: center; margin-top: 28px; }
 .uth-more a {
     display: inline-block; padding: 10px 24px; border-radius: 8px; text-decoration: none;
     border: 1px solid #bfdbfe; background: #fff; color: #1d4ed8; transition: .2s;
 }
 .uth-more a:hover { border-color: #2563eb; background: #eff6ff; }
 .uth-empty { text-align: center; color: #64748b; padding: 60px 0; }
+
+@media (max-width: 767.98px) {
+    .uth-catalog-panel { padding: 14px; border-radius: 18px; }
+}

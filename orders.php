@@ -1,13 +1,14 @@
 <?php
 require_once __DIR__ . '/config/database.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/includes/auth.php';
 
 // Bắt buộc đăng nhập
-if (!isset($_SESSION['user'])) {
-    header('Location: login.php');
+if (!isLoggedIn()) {
+    header('Location: login.php?redirect=orders.php');
     exit;
 }
-$userId = $_SESSION['user']['id'];
+$userId = (int)$_SESSION['user_id'];
 
 // Trạng thái trong DB -> [nhãn tiếng Việt, màu badge Bootstrap]
 function statusInfo($status) {
@@ -137,14 +138,20 @@ require_once __DIR__ . '/includes/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($orders as $o): [$label, $color] = statusInfo($o['status']); [$recipient] = shippingInfo($o['shipping_address']); ?>
+                    <?php foreach ($orders as $o): [$label, $color] = statusInfo($o['status']); [$recipient] = shippingInfo($o['shipping_address']); $isCurrentOrder = $detailOrder && (int)$detailOrder['id'] === (int)$o['id']; ?>
                         <tr>
                             <td class="fw-semibold">#<?= $o['id'] ?></td>
                             <td><?= htmlspecialchars($recipient) ?></td>
                             <td><span class="badge bg-<?= $color ?>"><?= $label ?></span></td>
                             <td><?= number_format($o['total_amount'], 0, ',', '.') ?>đ</td>
                             <td><?= date('d/m/Y H:i', strtotime($o['created_at'])) ?></td>
-                            <td><a href="orders.php?id=<?= $o['id'] ?>" class="btn btn-sm btn-outline-primary">Xem</a></td>
+                            <td>
+                                <?php if ($isCurrentOrder): ?>
+                                    <a href="orders.php" class="btn btn-sm btn-outline-secondary" aria-expanded="true">Ẩn chi tiết</a>
+                                <?php else: ?>
+                                    <a href="orders.php?id=<?= (int)$o['id'] ?>" class="btn btn-sm btn-outline-primary" aria-expanded="false">Xem</a>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>

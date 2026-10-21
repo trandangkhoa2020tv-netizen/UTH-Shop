@@ -1,13 +1,23 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/flash.php';
 
 if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
+    if (isAdmin()) {
+        flashWarning('Tài khoản quản trị chỉ dùng để quản lý cửa hàng. Hãy đăng nhập bằng tài khoản khách hàng để mua sắm.');
+        header('Location: /Web/products.php');
+        exit();
+    }
+
     $product_id = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
     $quantity = isset($_POST['quantity']) ? max(1, (int)$_POST['quantity']) : 1;
 
@@ -141,7 +151,13 @@ include_once __DIR__ . '/includes/header.php';
                 </div>
                 <div class="text-end">
                     <h4>Tổng thanh toán: <span class="text-danger fw-bold"><?= number_format($totalAmount, 0, ',', '.') ?> đ</span></h4>
-                    <a href="checkout.php" class="btn btn-success btn-lg mt-2">Tiến hành đặt hàng</a>
+                    <?php if (isAdmin()): ?>
+                        <div class="alert alert-info mt-3 mb-0 text-start">
+                            <i class="bi bi-shield-lock me-1"></i>Tài khoản quản trị không thể đặt hàng. Hãy dùng tài khoản khách hàng để thanh toán.
+                        </div>
+                    <?php else: ?>
+                        <a href="checkout.php" class="btn btn-success btn-lg mt-2">Tiến hành đặt hàng</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </form>

@@ -20,6 +20,30 @@ function postMaxSizeInBytes() {
     return (int)$size;
 }
 
+function validateAdminImageBatch($files, $maxFiles = 10, $maxTotalBytes = 31457280) {
+    if (!isset($files['name']) || !is_array($files['name'])) {
+        return;
+    }
+
+    $selectedIndices = [];
+    $totalBytes = 0;
+    foreach ($files['name'] as $index => $_) {
+        $error = $files['error'][$index] ?? UPLOAD_ERR_NO_FILE;
+        if ($error === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+        $selectedIndices[] = $index;
+        $totalBytes += (int)($files['size'][$index] ?? 0);
+    }
+
+    if (count($selectedIndices) > $maxFiles) {
+        throw new RuntimeException('Chỉ có thể tải tối đa ' . $maxFiles . ' ảnh phụ mỗi lần.');
+    }
+    if ($totalBytes > $maxTotalBytes) {
+        throw new RuntimeException('Tổng dung lượng ảnh phụ mỗi lần tải lên không được vượt quá 30 MB.');
+    }
+}
+
 function uploadAdminImage($file, $type) {
     if (!in_array($type, ['products', 'banners'], true)) {
         throw new RuntimeException('Thư mục tải ảnh không hợp lệ.');

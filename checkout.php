@@ -4,6 +4,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/flash.php';
+
+if (isAdmin()) {
+    flashWarning('Tài khoản quản trị chỉ dùng để quản lý cửa hàng. Hãy đăng nhập bằng tài khoản khách hàng để đặt hàng.');
+    header('Location: /Web/index.php');
+    exit();
+}
 
 if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart']) || empty($_SESSION['cart'])) {
     header("Location: cart.php");

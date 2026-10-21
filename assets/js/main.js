@@ -241,6 +241,138 @@ document.addEventListener('DOMContentLoaded', function () {
         startAutoplay();
     });
 
+    document.querySelectorAll('[data-product-gallery]').forEach(function (gallery) {
+        const track = gallery.querySelector('.product-gallery__track');
+        const slides = Array.from(gallery.querySelectorAll('.product-gallery__slide'));
+        const previousButton = gallery.querySelector('.product-gallery__nav--prev');
+        const nextButton = gallery.querySelector('.product-gallery__nav--next');
+
+        if (!track || slides.length < 2) return;
+
+        let currentIndex = 0;
+        let touchStartX = null;
+
+        function render() {
+            track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+            slides.forEach(function (slide, index) {
+                slide.setAttribute('aria-hidden', index === currentIndex ? 'false' : 'true');
+            });
+        }
+
+        previousButton && previousButton.addEventListener('click', function () {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            render();
+        });
+        nextButton && nextButton.addEventListener('click', function () {
+            currentIndex = (currentIndex + 1) % slides.length;
+            render();
+        });
+        const viewport = gallery.querySelector('.product-gallery__viewport');
+        if (viewport) {
+            viewport.addEventListener('touchstart', function (event) {
+                touchStartX = event.changedTouches[0].clientX;
+            }, { passive: true });
+            viewport.addEventListener('touchend', function (event) {
+                if (touchStartX === null) return;
+                const distance = event.changedTouches[0].clientX - touchStartX;
+                touchStartX = null;
+                if (Math.abs(distance) < 40) return;
+                currentIndex = (currentIndex + (distance < 0 ? 1 : -1) + slides.length) % slides.length;
+                render();
+            }, { passive: true });
+        }
+
+        render();
+    });
+
+    const productImageInputs = Array.from(document.querySelectorAll('[data-image-preview-input]'));
+    productImageInputs.forEach(function (input) {
+        const preview = input.parentElement.querySelector('[data-image-preview]');
+        if (!preview) return;
+
+        input.addEventListener('change', function () {
+            preview.replaceChildren();
+            Array.from(input.files || []).forEach(function (file) {
+                const card = document.createElement('div');
+                card.className = 'product-upload-preview__item';
+                const image = document.createElement('img');
+                image.alt = '';
+                image.src = URL.createObjectURL(file);
+                image.addEventListener('load', function () {
+                    URL.revokeObjectURL(image.src);
+                }, { once: true });
+                const name = document.createElement('span');
+                name.className = 'product-upload-preview__name';
+                name.textContent = file.name;
+                card.append(image, name);
+                preview.append(card);
+            });
+            validateImageSelection(input.closest('form'));
+        });
+    });
+
+    function validateImageSelection(form) {
+        if (!form) return true;
+        const inputs = Array.from(form.querySelectorAll('[data-image-preview-input]'));
+        const errors = [];
+        let totalBytes = 0;
+
+        inputs.forEach(function (input) {
+            const files = Array.from(input.files || []);
+            if (input.multiple && files.length > 10) {
+                errors.push('Chỉ chọn tối đa 10 ảnh phụ.');
+            }
+            files.forEach(function (file) {
+                totalBytes += file.size;
+                if (file.size > 5 * 1024 * 1024) {
+                    errors.push('Mỗi ảnh không được vượt quá 5 MB.');
+                }
+            });
+        });
+        if (totalBytes > 30 * 1024 * 1024) {
+            errors.push('Tổng dung lượng ảnh không được vượt quá 30 MB.');
+        }
+
+        inputs.forEach(function (input) {
+            const status = input.parentElement.querySelector('[data-image-preview-status]');
+            if (!status) return;
+            const files = Array.from(input.files || []);
+            status.textContent = errors.length
+                ? errors.join(' ')
+                : (files.length ? files.length + ' ảnh đã chọn · ' + (files.reduce(function (sum, file) {
+                    return sum + file.size;
+                }, 0) / (1024 * 1024)).toFixed(1) + ' MB' : '');
+            status.classList.toggle('text-danger', errors.length > 0);
+            status.classList.toggle('text-secondary', errors.length === 0);
+        });
+        return errors.length === 0;
+    }
+
+    new Set(productImageInputs.map(function (input) {
+        return input.closest('form');
+    }).filter(Boolean)).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!validateImageSelection(form)) {
+                event.preventDefault();
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-password-toggle]').forEach(function (toggle) {
+        toggle.addEventListener('click', function () {
+            const input = document.getElementById(toggle.getAttribute('data-password-toggle'));
+            if (!input) return;
+            const showingPassword = input.type === 'password';
+            input.type = showingPassword ? 'text' : 'password';
+            toggle.setAttribute('aria-label', showingPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+            const icon = toggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('bi-eye', !showingPassword);
+                icon.classList.toggle('bi-eye-slash', showingPassword);
+            }
+        });
+    });
+
     const bannerFileInput = document.getElementById('images');
     const bannerUploadSummary = document.getElementById('banner-upload-summary');
     const bannerUploadButton = document.querySelector('[data-banner-upload-submit]');

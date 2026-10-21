@@ -10,6 +10,7 @@ $products = $conn->query(
 adminHeader('Quản lý sản phẩm');
 ?>
 <?php if (isset($_GET['saved'])): ?><div class="alert alert-success">Đã lưu sản phẩm.</div><?php endif; ?>
+<?php if (isset($_GET['image_cleanup_error'])): ?><div class="alert alert-warning">Đã cập nhật ảnh sản phẩm, nhưng một số tệp ảnh cũ chưa được dọn khỏi máy chủ.</div><?php endif; ?>
 <?php if (isset($_GET['deleted'])): ?><div class="alert alert-success">Đã xóa sản phẩm.</div><?php endif; ?>
 <?php if (isset($_GET['delete_error'])): ?><div class="alert alert-warning">Không thể xóa sản phẩm đã có trong đơn hàng để giữ nguyên lịch sử giao dịch.</div><?php endif; ?>
 <div class="d-flex justify-content-end mb-3">

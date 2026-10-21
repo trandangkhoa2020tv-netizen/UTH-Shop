@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/auth.php';
 
 function e($value) {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
@@ -17,12 +18,29 @@ if ($productId === false || $productId < 1) {
 }
 
 $stmt = $conn->prepare(
-    'SELECT p.id, p.name, p.price, p.description, p.image, p.category_id, c.name AS category_name
+    'SELECT p.id, p.name, p.price, p.description, p.image, p.category_id, p.brand, p.cpu, p.ram, c.name AS category_name
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
      WHERE p.id = :id LIMIT 1'
 );
 $stmt->execute([':id' => $productId]);
 $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$gallery = [];
+if ($product) {
+    $galleryStmt = $conn->prepare(
+        'SELECT image, is_primary, sort_order FROM product_images WHERE product_id = :product_id ORDER BY is_primary DESC, sort_order ASC, id ASC'
+    );
+    $galleryStmt->execute([':product_id' => $product['id']]);
+    $productImages = $galleryStmt->fetchAll(PDO::FETCH_ASSOC);
+    $primaryImage = $product['image'] ?: ($productImages[0]['image'] ?? '');
+    $gallery[] = ['image' => $primaryImage];
+    foreach ($productImages as $productImage) {
+        if ($productImage['image'] !== $primaryImage) {
+            $gallery[] = $productImage;
+        }
+    }
+    $product['image'] = $primaryImage;
+}
 
 $pageTitle = $product ? $product['name'] . ' | UTH Shop' : 'Không tìm thấy sản phẩm | UTH Shop';
 $notice = '';
@@ -32,7 +50,9 @@ if ($product && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $token = (string)($_POST['csrf_token'] ?? '');
     $quantity = filter_var($_POST['quantity'] ?? 1, FILTER_VALIDATE_INT);
 
-    if (!verifyCsrfToken($token)) {
+    if (isAdmin()) {
+        $notice = 'Tài khoản quản trị chỉ dùng để quản lý cửa hàng, không thể thêm sản phẩm vào giỏ hàng.';
+    } elseif (!verifyCsrfToken($token)) {
         $notice = 'Phiên gửi biểu mẫu không hợp lệ. Vui lòng tải lại trang và thử lại.';
     } elseif ($quantity === false || $quantity < 1 || $quantity > 99) {
         $notice = 'Số lượng phải từ 1 đến 99.';
@@ -91,11 +111,32 @@ require_once __DIR__ . '/includes/header.php';
 
         <div class="row g-4 g-lg-5 align-items-start">
             <div class="col-12 col-md-6">
-                <div class="bg-white rounded-lg shadow-sm p-3 p-md-4">
-                    <img src="<?php echo e($imagePath); ?>" alt="<?php echo e($product['name']); ?>"
-                         onerror="this.onerror=null;this.src='/Web/image/no-image.svg'"
-                         class="w-100 rounded" style="max-height: 520px; object-fit: contain;">
-                </div>
+                <?php if (!empty($gallery)): ?>
+                    <div class="product-gallery bg-white rounded-lg shadow-sm p-3 p-md-4" data-product-gallery>
+                        <div class="product-gallery__viewport">
+                            <div class="product-gallery__track">
+                                <?php foreach ($gallery as $index => $item): ?>
+                                    <div class="product-gallery__slide" aria-label="Ảnh sản phẩm <?= (int)($index + 1) ?>" aria-hidden="<?= $index === 0 ? 'false' : 'true' ?>">
+                                        <img src="<?= e(getProductImage($item['image'] ?? '')) ?>" alt="<?= e($product['name']) ?>"
+                                             loading="eager" onerror="this.onerror=null;this.src='/Web/image/no-image.svg'">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php if (count($gallery) > 1): ?>
+                            <div class="product-gallery__controls">
+                                <button type="button" class="product-gallery__nav product-gallery__nav--prev" aria-label="Ảnh trước">‹</button>
+                                <button type="button" class="product-gallery__nav product-gallery__nav--next" aria-label="Ảnh sau">›</button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="bg-white rounded-lg shadow-sm p-3 p-md-4">
+                        <img src="<?php echo e($imagePath); ?>" alt="<?php echo e($product['name']); ?>"
+                             onerror="this.onerror=null;this.src='/Web/image/no-image.svg'"
+                             class="w-100 rounded" style="max-height: 520px; object-fit: contain;">
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="col-12 col-md-6">
                 <?php if (!empty($product['category_name'])): ?>
@@ -104,24 +145,56 @@ require_once __DIR__ . '/includes/header.php';
                 <h1 class="h2 fw-bold mb-3"><?php echo e($product['name']); ?></h1>
                 <div class="product-card__price fs-3 mb-3"><?php echo e(formatPrice($product['price'])); ?></div>
                 <p class="text-secondary">Sản phẩm chính hãng được cung cấp bởi UTH Shop.</p>
+                <?php
+                $specifications = [
+                    'Thương hiệu' => $product['brand'],
+                    'Bộ xử lý (CPU)' => $product['cpu'],
+                    'Bộ nhớ RAM' => $product['ram'],
+                ];
+                $specifications = array_filter($specifications, static function ($value) {
+                    return trim((string)$value) !== '';
+                });
+                ?>
+                <?php if ($specifications): ?>
+                    <div class="product-specs mb-3">
+                        <h2 class="h6 fw-bold mb-2">Thông số cơ bản</h2>
+                        <dl class="product-specs__list mb-0">
+                            <?php foreach ($specifications as $label => $value): ?>
+                                <div class="product-specs__row">
+                                    <dt><?= e($label) ?></dt>
+                                    <dd><?= e($value) ?></dd>
+                                </div>
+                            <?php endforeach; ?>
+                        </dl>
+                    </div>
+                <?php endif; ?>
                 <hr>
                 <h2 class="h5 fw-bold">Mô tả sản phẩm</h2>
                 <p class="text-secondary" style="white-space: pre-line;"><?php echo e($product['description'] ?: 'Thông tin mô tả đang được cập nhật.'); ?></p>
 
-                <form method="post" action="/Web/product_detail.php?id=<?php echo (int)$product['id']; ?>" class="mt-4">
-                    <?php echo csrfInput(); ?>
-                    <div class="mb-3" style="max-width: 150px;">
-                        <label for="quantity" class="form-label">Số lượng</label>
-                        <input class="form-control" type="number" id="quantity" name="quantity"
-                               value="1" min="1" max="99" required>
+                <?php if (isAdmin()): ?>
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-shield-lock me-1"></i>Tài khoản quản trị không thể mua hàng.
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                        <i class="bi bi-cart-plus me-2"></i>Thêm vào giỏ hàng
-                    </button>
-                    <a href="/Web/cart.php" class="btn btn-outline-primary w-100 mt-2">
-                        <i class="bi bi-bag-check me-2"></i>Xem giỏ hàng
+                    <a href="/Web/admin/products/edit.php?id=<?= (int)$product['id'] ?>" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa sản phẩm này
                     </a>
-                </form>
+                <?php else: ?>
+                    <form method="post" action="/Web/product_detail.php?id=<?php echo (int)$product['id']; ?>" class="mt-4">
+                        <?php echo csrfInput(); ?>
+                        <div class="mb-3" style="max-width: 150px;">
+                            <label for="quantity" class="form-label">Số lượng</label>
+                            <input class="form-control" type="number" id="quantity" name="quantity"
+                                   value="1" min="1" max="99" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-cart-plus me-2"></i>Thêm vào giỏ hàng
+                        </button>
+                        <a href="/Web/cart.php" class="btn btn-outline-primary w-100 mt-2">
+                            <i class="bi bi-bag-check me-2"></i>Xem giỏ hàng
+                        </a>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
     <?php endif; ?>
