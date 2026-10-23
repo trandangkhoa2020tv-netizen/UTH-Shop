@@ -18,6 +18,49 @@ if ($categoryId === false || $categoryId < 1) {
     $categoryId = null;
 }
 
+$rawMinPrice = $_GET['min_price'] ?? '';
+$rawMaxPrice = $_GET['max_price'] ?? '';
+$minPriceInput = is_scalar($rawMinPrice) ? trim((string)$rawMinPrice) : '';
+$maxPriceInput = is_scalar($rawMaxPrice) ? trim((string)$rawMaxPrice) : '';
+$parsePrice = static function (string $value): ?string {
+    if ($value === '') {
+        return null;
+    }
+    if (preg_match('/^\d+$/D', $value) === 1) {
+        return $value;
+    }
+    if (preg_match('/^\d{1,3}(?:\.\d{3})+$/D', $value) === 1) {
+        return str_replace('.', '', $value);
+    }
+    return null;
+};
+$minPrice = $parsePrice($minPriceInput);
+$maxPrice = $parsePrice($maxPriceInput);
+$minPriceDisplay = $minPrice !== null ? number_format((float)$minPrice, 0, ',', '.') : $minPriceInput;
+$maxPriceDisplay = $maxPrice !== null ? number_format((float)$maxPrice, 0, ',', '.') : $maxPriceInput;
+$filterError = null;
+
+if ($minPriceInput !== '' && $minPrice === null) {
+    $filterError = 'Giá tối thiểu không hợp lệ. Hãy nhập số tiền, có thể dùng dấu chấm phân tách hàng nghìn.';
+} elseif ($maxPriceInput !== '' && $maxPrice === null) {
+    $filterError = 'Giá tối đa không hợp lệ. Hãy nhập số tiền, có thể dùng dấu chấm phân tách hàng nghìn.';
+} elseif ($minPrice !== null && $maxPrice !== null && (float)$minPrice > (float)$maxPrice) {
+    $filterError = 'Giá tối thiểu không thể lớn hơn giá tối đa.';
+    $minPrice = null;
+    $maxPrice = null;
+}
+
+$sortOptions = [
+    'newest' => 'p.id DESC',
+    'price_asc' => 'p.price ASC, p.id DESC',
+    'price_desc' => 'p.price DESC, p.id DESC',
+    'name_asc' => 'p.name ASC, p.id DESC',
+];
+$sort = is_scalar($_GET['sort'] ?? null) ? (string)$_GET['sort'] : 'newest';
+if (!isset($sortOptions[$sort])) {
+    $sort = 'newest';
+}
+
 $categories = [];
 try {
     $categoryStmt = $conn->query('SELECT id, name FROM categories ORDER BY name');
@@ -30,15 +73,24 @@ try {
     $params = [];
 
     if ($q !== '') {
-        $sql .= ' AND (p.name LIKE :q OR p.description LIKE :q)';
-        $params[':q'] = '%' . $q . '%';
+        $sql .= ' AND (p.name LIKE :name_q OR p.description LIKE :description_q)';
+        $params[':name_q'] = '%' . $q . '%';
+        $params[':description_q'] = '%' . $q . '%';
     }
     if ($categoryId !== null) {
         $sql .= ' AND p.category_id = :category_id';
         $params[':category_id'] = $categoryId;
     }
+    if ($filterError === null && $minPrice !== null) {
+        $sql .= ' AND p.price >= :min_price';
+        $params[':min_price'] = $minPrice;
+    }
+    if ($filterError === null && $maxPrice !== null) {
+        $sql .= ' AND p.price <= :max_price';
+        $params[':max_price'] = $maxPrice;
+    }
 
-    $sql .= ' ORDER BY p.id DESC';
+    $sql .= ' ORDER BY ' . $sortOptions[$sort];
     $stmt = $conn->prepare($sql);
     $stmt->execute($params);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,13 +112,13 @@ require_once __DIR__ . '/includes/header.php';
         <span class="text-secondary small"><?php echo count($products); ?> sản phẩm</span>
     </div>
 
-    <form action="/Web/products.php" method="get" class="row g-2 align-items-end mb-4 p-3 bg-white rounded-lg shadow-sm">
-        <div class="col-12 col-md-6">
+    <form action="/Web/products.php" method="get" class="row g-3 align-items-end mb-4 p-3 bg-white rounded-lg shadow-sm">
+        <div class="col-12 col-md-3">
             <label for="q" class="form-label">Tìm kiếm sản phẩm</label>
             <input type="search" class="form-control" id="q" name="q"
                    placeholder="Nhập tên hoặc mô tả sản phẩm..." value="<?php echo e($q); ?>">
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-3">
             <label for="category" class="form-label">Danh mục</label>
             <select class="form-select" id="category" name="category">
                 <option value="">Tất cả danh mục</option>
@@ -78,13 +130,50 @@ require_once __DIR__ . '/includes/header.php';
                 <?php endforeach; ?>
             </select>
         </div>
+        <div class="col-6 col-md-2">
+            <label for="min_price" class="form-label">Giá từ (₫)</label>
+            <div class="price-filter-stepper">
+                <button type="button" class="price-filter-stepper__button" data-price-step="-1"
+                        aria-label="Giảm giá tối thiểu 500.000 đồng"><i class="bi bi-dash"></i></button>
+                <input type="text" class="form-control price-filter-stepper__input" id="min_price" name="min_price"
+                       inputmode="numeric" autocomplete="off" data-price-format
+                       value="<?php echo e($minPriceDisplay); ?>" placeholder="Thấp nhất">
+                <button type="button" class="price-filter-stepper__button" data-price-step="1"
+                        aria-label="Tăng giá tối thiểu 500.000 đồng"><i class="bi bi-plus"></i></button>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="max_price" class="form-label">Giá đến (₫)</label>
+            <div class="price-filter-stepper">
+                <button type="button" class="price-filter-stepper__button" data-price-step="-1"
+                        aria-label="Giảm giá tối đa 500.000 đồng"><i class="bi bi-dash"></i></button>
+                <input type="text" class="form-control price-filter-stepper__input" id="max_price" name="max_price"
+                       inputmode="numeric" autocomplete="off" data-price-format
+                       value="<?php echo e($maxPriceDisplay); ?>" placeholder="Cao nhất">
+                <button type="button" class="price-filter-stepper__button" data-price-step="1"
+                        aria-label="Tăng giá tối đa 500.000 đồng"><i class="bi bi-plus"></i></button>
+            </div>
+        </div>
+        <div class="col-12 col-md-2">
+            <label for="sort" class="form-label">Sắp xếp</label>
+            <select class="form-select" id="sort" name="sort">
+                <option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
+                <option value="price_asc" <?php echo $sort === 'price_asc' ? 'selected' : ''; ?>>Giá thấp đến cao</option>
+                <option value="price_desc" <?php echo $sort === 'price_desc' ? 'selected' : ''; ?>>Giá cao đến thấp</option>
+                <option value="name_asc" <?php echo $sort === 'name_asc' ? 'selected' : ''; ?>>Tên A–Z</option>
+            </select>
+        </div>
         <div class="col-6 col-md-1 d-grid">
-            <button type="submit" class="btn btn-primary" aria-label="Tìm kiếm"><i class="bi bi-search"></i></button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Lọc</button>
         </div>
         <div class="col-6 col-md-1 d-grid">
             <a href="/Web/products.php" class="btn btn-outline-secondary">Xóa lọc</a>
         </div>
     </form>
+
+    <?php if ($filterError !== null): ?>
+        <div class="alert alert-warning"><?php echo e($filterError); ?></div>
+    <?php endif; ?>
 
     <?php if (!empty($loadError)): ?>
         <div class="alert alert-danger"><?php echo e($loadError); ?></div>
@@ -92,7 +181,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="text-center bg-white rounded-lg p-5 shadow-sm">
             <i class="bi bi-box-seam display-4 text-secondary"></i>
             <h2 class="h5 mt-3">Không tìm thấy sản phẩm</h2>
-            <p class="text-secondary mb-0">Bạn hãy thử từ khóa khác hoặc chọn danh mục khác.</p>
+            <p class="text-secondary mb-0">Bạn hãy thử thay đổi từ khóa, danh mục hoặc khoảng giá.</p>
         </div>
     <?php else: ?>
         <div class="row g-3 g-md-4">

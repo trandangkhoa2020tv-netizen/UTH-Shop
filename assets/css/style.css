@@ -452,6 +452,53 @@ h1, h2, h3, h4, h5, h6 {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
 }
+.price-filter-stepper {
+    display: flex;
+    align-items: stretch;
+    height: 42px;
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    background: #fff;
+    transition: var(--transition);
+}
+.price-filter-stepper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+.price-filter-stepper__input.form-control {
+    min-width: 0;
+    height: 100%;
+    padding: .55rem .25rem;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: center;
+}
+.price-filter-stepper__input.form-control:focus {
+    border: 0;
+    box-shadow: none;
+}
+.price-filter-stepper__button {
+    display: inline-flex;
+    flex: 0 0 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: #fff;
+    color: var(--gray-500);
+    transition: var(--transition);
+}
+.price-filter-stepper__button:hover,
+.price-filter-stepper__button:focus-visible {
+    background: var(--gray-100);
+    color: var(--primary);
+}
+.price-filter-stepper__button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
 .form-label { font-weight: 500; font-size: .9rem; margin-bottom: .35rem; }
 
 /* ---- 12. AUTH CARDS (login / register) ---- */

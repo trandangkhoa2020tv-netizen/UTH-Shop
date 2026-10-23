@@ -395,13 +395,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ----------------------------------------
-    // 10. FORMAT GIÁ INPUT (admin — tự thêm dấu chấm)
+    // 10. FORMAT GIÁ INPUT (tự thêm dấu chấm theo định dạng Việt Nam)
     // ----------------------------------------
-    document.querySelectorAll('input[data-format="price"]').forEach(function (input) {
+    document.querySelectorAll('input[data-format="price"], input[data-price-format]').forEach(function (input) {
         input.addEventListener('input', function () {
             let raw = this.value.replace(/\D/g, '');
             this.value = raw ? parseInt(raw, 10).toLocaleString('vi-VN') : '';
         });
+
+        if (input.hasAttribute('data-price-format')) {
+            const buttonGroup = input.closest('.price-filter-stepper');
+            if (!buttonGroup) return;
+
+            buttonGroup.querySelectorAll('[data-price-step]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const currentPrice = Number(input.value.replace(/\D/g, '')) || 0;
+                    const step = Number(button.getAttribute('data-price-step')) * 500000;
+                    input.value = Math.max(0, currentPrice + step).toLocaleString('vi-VN');
+                });
+            });
+        }
     });
 
 }); // END DOMContentLoaded

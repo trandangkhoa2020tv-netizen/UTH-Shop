@@ -14,6 +14,7 @@ Website bán hàng trực tuyến được xây dựng bằng **PHP thuần, MyS
 
 ### 🛒 Khách hàng
 - Xem trang chủ và danh sách sản phẩm.
+- Tìm kiếm và lọc sản phẩm theo danh mục, khoảng giá; sắp xếp theo thời gian, giá hoặc tên.
 - Xem thông tin chi tiết sản phẩm.
 - Thêm sản phẩm vào giỏ hàng.
 - Đặt hàng trực tuyến bằng tiền mặt hoặc chuyển khoản.

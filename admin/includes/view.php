@@ -3,6 +3,22 @@ function adminEscape($value) {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
+function adminNormalizePrice($value) {
+    $price = trim((string)($value ?? ''));
+    if (preg_match('/^\d{1,3}(?:\.\d{3})+$/D', $price) === 1) {
+        return str_replace('.', '', $price);
+    }
+    if (preg_match('/^\d+(?:\.\d{1,2})?$/D', $price) === 1) {
+        return $price;
+    }
+    return null;
+}
+
+function adminFormatPriceInput($value) {
+    $price = adminNormalizePrice($value);
+    return $price === null ? (string)($value ?? '') : number_format((float)$price, 0, ',', '.');
+}
+
 function adminHeader($title) {
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');

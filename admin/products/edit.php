@@ -41,11 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_POST['specification_values'] ?? [],
         $specificationError
     );
+    $price = adminNormalizePrice($values['price']);
     if (!verifyCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
         $error = 'Phiên gửi biểu mẫu không hợp lệ. Vui lòng tải lại trang.';
     } elseif ($specificationError !== '') {
         $error = $specificationError;
-    } elseif ($values['name'] === '' || !is_numeric($values['price']) || (float)$values['price'] < 0 ||
+    } elseif ($values['name'] === '' || $price === null || (float)$price < 0 ||
         filter_var($values['stock'], FILTER_VALIDATE_INT) === false || (int)$values['stock'] < 0) {
         $error = 'Nhập tên, giá hợp lệ và số lượng tồn kho không âm.';
     } else {
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ? json_encode($specifications, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
                     : null,
                 ':description' => $values['description'] ?: null,
-                ':price' => (float)$values['price'],
+                ':price' => (float)$price,
                 ':stock' => (int)$values['stock'],
                 ':image' => $image,
                 ':id' => $id,
@@ -191,7 +192,7 @@ adminHeader('Cập nhật sản phẩm');
     <div class="row g-3">
         <div class="col-md-8"><label class="form-label" for="name">Tên sản phẩm *</label><input class="form-control" id="name" name="name" required maxlength="150" value="<?= adminEscape($values['name']) ?>"></div>
         <div class="col-md-4"><label class="form-label" for="category_id">Danh mục</label><select class="form-select" id="category_id" name="category_id"><option value="">Chưa phân loại</option><?php foreach ($categories as $category): ?><option value="<?= (int)$category['id'] ?>" <?= (string)$values['category_id'] === (string)$category['id'] ? 'selected' : '' ?>><?= adminEscape($category['name']) ?></option><?php endforeach; ?></select></div>
-        <div class="col-md-4"><label class="form-label" for="price">Giá *</label><input class="form-control" id="price" name="price" type="number" min="0" step="0.01" required value="<?= adminEscape($values['price']) ?>"></div>
+        <div class="col-md-4"><label class="form-label" for="price">Giá (₫) *</label><input class="form-control" id="price" name="price" type="text" inputmode="numeric" data-format="price" autocomplete="off" required value="<?= adminEscape(adminFormatPriceInput($values['price'])) ?>"></div>
         <div class="col-md-4"><label class="form-label" for="stock">Số lượng tồn kho (cái)</label><input class="form-control" id="stock" name="stock" type="number" min="0" step="1" value="<?= adminEscape($values['stock']) ?>"></div>
         <div class="col-md-4">
             <label class="form-label" for="brand">Thương hiệu</label>
