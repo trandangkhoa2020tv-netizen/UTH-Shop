@@ -45,7 +45,7 @@ Web/
 │   │   │   └── banner_slides.php       # Tạo bảng slide banner và chuyển/khôi phục dữ liệu banner cũ
 │   │   ├── bootstrap.php               # Khởi tạo session, nạp cấu hình và bắt buộc quyền admin
 │   │   ├── media.php                   # Kiểm tra, lưu và xóa ảnh sản phẩm/banner đã tải lên
-│   │   └── view.php                    # Hàm dựng khung giao diện và escape dữ liệu trang admin
+│   │   └── view.php                    # Hàm dựng giao diện, định dạng dữ liệu và escape nội dung admin
 │   ├── orders/
 │   │   ├── detail.php                  # Chi tiết đơn hàng, thông tin khách và mặt hàng
 │   │   ├── index.php                   # Danh sách đơn hàng
@@ -58,7 +58,8 @@ Web/
 │   ├── users/
 │   │   ├── delete.php                  # Xóa khách hàng đủ điều kiện
 │   │   ├── detail.php                  # Hồ sơ khách hàng và lịch sử đơn hàng
-│   │   └── index.php                   # Tìm kiếm, phân trang và quản lý khách hàng
+│   │   ├── index.php                   # Tìm kiếm, lọc, phân trang và quản lý vai trò người dùng
+│   │   └── update_role.php             # Cập nhật vai trò User/Admin
 │   ├── index.php                       # Dashboard thống kê quản trị
 │   ├── login.php                       # Đăng nhập quản trị
 │   └── logout.php                      # Đăng xuất quản trị
@@ -69,20 +70,33 @@ Web/
 │   └── js/
 │       └── main.js                     # Tương tác giao diện như giỏ hàng, menu và nút lên đầu trang
 ├── config/
-│   ├── database.php                    # Kết nối MySQL dùng bởi ứng dụng
-│   ├── database.local.php.example      # Mẫu cấu hình local (sao chép và điền thông tin)
-│   └── database_connection.php         # Đọc cấu hình và mở kết nối PDO
+│   ├── database.php                    # Kết nối MySQL dùng bởi ứng dụng (mặc định localhost:3307)
+│   ├── database.local.php.example      # Mẫu cấu hình MySQL cho môi trường local
+│   ├── database_connection.php         # Đọc cấu hình và mở kết nối PDO
+│   ├── database_hosting.php            # Kết nối MySQL cho môi trường hosting
+│   └── database_hosting.local.php.example # Mẫu cấu hình kết nối hosting
 ├── image/                              # Ảnh tĩnh: logo, banner và ảnh sản phẩm mẫu
 ├── includes/
 │   ├── auth.php                        # Session, đăng nhập/đăng xuất và phân quyền
 │   ├── flash.php                       # Tạo và hiển thị thông báo flash
 │   ├── footer.php                      # Footer, liên kết và nạp JavaScript dùng chung
 │   ├── functions.php                   # Hàm hỗ trợ, CSRF, xử lý ảnh, định dạng và giỏ hàng
-│   └── header.php                      # Khung đầu trang, menu, tìm kiếm và trạng thái tài khoản
+│   ├── header.php                      # Khung đầu trang, menu, tìm kiếm và trạng thái tài khoản
+│   ├── product_specifications.php      # Chuẩn hóa thông số kỹ thuật sản phẩm
+│   ├── review_media.php                # Kiểm tra và lưu ảnh đánh giá
+│   └── migrations/                     # Migration các tính năng phía cửa hàng
+│       ├── account_profile_fields.php  # Trường hồ sơ tài khoản
+│       ├── product_reviews.php         # Bảng đánh giá sản phẩm
+│       ├── product_specifications.php  # Trường thông số kỹ thuật sản phẩm
+│       ├── promo_marquee.php           # Nội dung thanh thông báo chạy chữ
+│       └── side_banners.php            # Banner dọc
 ├── uploads/
 │   ├── banners/                        # Ảnh banner tải lên từ trang quản trị
 │   ├── products/                       # Ảnh sản phẩm tải lên từ trang quản trị
+│   ├── reviews/                        # Ảnh đính kèm đánh giá sản phẩm
 │   └── .htaccess                       # Tắt liệt kê thư mục và chặn thực thi tệp script đã tải lên
+├── tests/
+│   └── run.php                         # Kiểm tra PHP độc lập
 ├── cart.php                            # Xem, cập nhật và xóa sản phẩm trong giỏ hàng
 ├── checkout.php                        # Nhập thông tin giao hàng và tạo đơn hàng
 ├── database.sql                        # Chỉ tạo database và cấu trúc bảng
@@ -93,7 +107,7 @@ Web/
 ├── logout.php                          # Đăng xuất tài khoản
 ├── orders.php                          # Lịch sử đơn hàng của khách hàng
 ├── product_detail.php                  # Chi tiết sản phẩm và lựa chọn ảnh
-├── products.php                        # Danh sách, tìm kiếm và lọc sản phẩm
+├── products.php                        # Danh sách, tìm kiếm, lọc và sắp xếp sản phẩm
 ├── reviews.php                         # Gửi đánh giá sản phẩm đã mua
 ├── register.php                        # Đăng ký tài khoản khách hàng
 └── README.md                           # Giới thiệu, cấu trúc và hướng dẫn cài đặt dự án
