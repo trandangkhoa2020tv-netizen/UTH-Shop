@@ -18,6 +18,18 @@ if ($categoryId === false || $categoryId < 1) {
     $categoryId = null;
 }
 
+$brandOptions = [
+    'apple' => 'Apple',
+    'samsung' => 'Samsung',
+    'dell' => 'Dell',
+    'asus' => 'Asus',
+    'sony' => 'Sony',
+];
+$brand = is_scalar($_GET['brand'] ?? null) ? strtolower(trim((string)$_GET['brand'])) : '';
+if (!isset($brandOptions[$brand])) {
+    $brand = '';
+}
+
 $rawMinPrice = $_GET['min_price'] ?? '';
 $rawMaxPrice = $_GET['max_price'] ?? '';
 $minPriceInput = is_scalar($rawMinPrice) ? trim((string)$rawMinPrice) : '';
@@ -81,6 +93,10 @@ try {
         $sql .= ' AND p.category_id = :category_id';
         $params[':category_id'] = $categoryId;
     }
+    if ($brand !== '') {
+        $sql .= ' AND LOWER(TRIM(p.brand)) = :brand';
+        $params[':brand'] = $brand;
+    }
     if ($filterError === null && $minPrice !== null) {
         $sql .= ' AND p.price >= :min_price';
         $params[':min_price'] = $minPrice;
@@ -113,12 +129,12 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <form action="/Web/products.php" method="get" class="row g-3 align-items-end mb-4 p-3 bg-white rounded-lg shadow-sm">
-        <div class="col-12 col-md-3">
+        <div class="col-12 col-md-4">
             <label for="q" class="form-label">Tìm kiếm sản phẩm</label>
             <input type="search" class="form-control" id="q" name="q"
                    placeholder="Nhập tên hoặc mô tả sản phẩm..." value="<?php echo e($q); ?>">
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-12 col-md-2">
             <label for="category" class="form-label">Danh mục</label>
             <select class="form-select" id="category" name="category">
                 <option value="">Tất cả danh mục</option>
@@ -126,6 +142,18 @@ require_once __DIR__ . '/includes/header.php';
                     <option value="<?php echo (int)$category['id']; ?>"
                         <?php echo ($categoryId === (int)$category['id']) ? 'selected' : ''; ?>>
                         <?php echo e($category['name']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="col-12 col-md-2">
+            <label for="brand" class="form-label">Thương hiệu</label>
+            <select class="form-select" id="brand" name="brand">
+                <option value="">Tất cả thương hiệu</option>
+                <?php foreach ($brandOptions as $brandValue => $brandLabel): ?>
+                    <option value="<?php echo e($brandValue); ?>"
+                        <?php echo $brand === $brandValue ? 'selected' : ''; ?>>
+                        <?php echo e($brandLabel); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -154,7 +182,7 @@ require_once __DIR__ . '/includes/header.php';
                         aria-label="Tăng giá tối đa 500.000 đồng"><i class="bi bi-plus"></i></button>
             </div>
         </div>
-        <div class="col-12 col-md-2">
+        <div class="col-12 col-md-3">
             <label for="sort" class="form-label">Sắp xếp</label>
             <select class="form-select" id="sort" name="sort">
                 <option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
@@ -163,10 +191,8 @@ require_once __DIR__ . '/includes/header.php';
                 <option value="name_asc" <?php echo $sort === 'name_asc' ? 'selected' : ''; ?>>Tên A–Z</option>
             </select>
         </div>
-        <div class="col-6 col-md-1 d-grid">
+        <div class="col-12 col-md-3 d-flex gap-2">
             <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Lọc</button>
-        </div>
-        <div class="col-6 col-md-1 d-grid">
             <a href="/Web/products.php" class="btn btn-outline-secondary">Xóa lọc</a>
         </div>
     </form>

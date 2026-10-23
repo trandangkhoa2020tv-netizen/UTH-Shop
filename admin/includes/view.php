@@ -19,6 +19,17 @@ function adminFormatPriceInput($value) {
     return $price === null ? (string)($value ?? '') : number_format((float)$price, 0, ',', '.');
 }
 
+function adminUserListUrl($params = []) {
+    $allowed = ['q', 'role', 'date_from', 'date_to', 'page', 'deleted', 'delete_error', 'role_updated', 'role_error'];
+    $query = [];
+    foreach ($allowed as $key) {
+        if (isset($params[$key]) && is_scalar($params[$key]) && (string)$params[$key] !== '') {
+            $query[$key] = (string)$params[$key];
+        }
+    }
+    return '/Web/admin/users/index.php' . ($query ? '?' . http_build_query($query) : '');
+}
+
 function adminHeader($title) {
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');

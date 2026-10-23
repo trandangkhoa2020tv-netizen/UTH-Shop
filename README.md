@@ -14,7 +14,7 @@ Website bán hàng trực tuyến được xây dựng bằng **PHP thuần, MyS
 
 ### 🛒 Khách hàng
 - Xem trang chủ và danh sách sản phẩm.
-- Tìm kiếm và lọc sản phẩm theo danh mục, khoảng giá; sắp xếp theo thời gian, giá hoặc tên.
+- Tìm kiếm và lọc sản phẩm theo danh mục, thương hiệu, khoảng giá; sắp xếp theo thời gian, giá hoặc tên.
 - Xem thông tin chi tiết sản phẩm.
 - Thêm sản phẩm vào giỏ hàng.
 - Đặt hàng trực tuyến bằng tiền mặt hoặc chuyển khoản.
@@ -24,7 +24,7 @@ Website bán hàng trực tuyến được xây dựng bằng **PHP thuần, MyS
 ### ⚙️ Quản trị viên (Admin)
 - Quản lý danh mục sản phẩm (CRUD).
 - Quản lý sản phẩm, thông số kỹ thuật và nhiều ảnh (CRUD).
-- Quản lý tài khoản người dùng.
+- Quản lý tài khoản người dùng: tìm kiếm, lọc theo vai trò/ngày tạo, phân quyền và xóa tài khoản đủ điều kiện.
 - Quản lý đơn hàng.
 - Quản lý banner ngang/dọc và nội dung thanh thông báo chạy chữ.
 
@@ -113,7 +113,7 @@ C:\xampp\htdocs\Web\
 ```
 
 ### Bước 3: Cấu hình kết nối database
-Có thể cấu hình bằng biến môi trường `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, hoặc tạo file local không được Git theo dõi:
+Có thể cấu hình bằng biến môi trường `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, hoặc tạo file local không được Git theo dõi. Cấu hình XAMPP mặc định dùng MySQL tại `localhost:3307`:
 
 1. Sao chép `config/database.local.php.example` thành `config/database.local.php`.
 2. Điền thông tin kết nối MySQL trong file local. Không commit file này hoặc mật khẩu database.
