@@ -1,4 +1,94 @@
 <?php
-require_once __DIR__ . '/../bootstrap.php'; require_admin();$status=trim($_GET['status']??'');$q=trim($_GET['q']??'');$allowed=['pending','processing','completed','cancelled'];$sql="SELECT o.*,u.full_name,u.email FROM orders o LEFT JOIN users u ON u.id=o.user_id WHERE 1=1";$params=[];if(in_array($status,$allowed,true)){$sql.=' AND o.status=?';$params[]=$status;}if($q!==''){if(ctype_digit($q)){$sql.=' AND (o.id=? OR u.full_name LIKE ? OR o.phone LIKE ?)';$params[]=(int)$q;$params[]="%$q%";$params[]="%$q%";}else{$sql.=' AND (u.full_name LIKE ? OR u.email LIKE ? OR o.phone LIKE ?)';$params[]="%$q%";$params[]="%$q%";$params[]="%$q%";}}$sql.=' ORDER BY o.created_at DESC';$st=$conn->prepare($sql);$st->execute($params);$rows=$st->fetchAll(PDO::FETCH_ASSOC);$labels=['pending'=>'Chờ xử lý','processing'=>'Đang xử lý','completed'=>'Hoàn thành','cancelled'=>'Đã hủy'];
-admin_header('Quản lý đơn hàng'); ?>
-<div class="card"><div class="toolbar"><form class="search" method="get"><input class="form-control" name="q" placeholder="Mã đơn, khách hàng, email hoặc SĐT..." value="<?= h($q) ?>"><select class="form-control" name="status" style="width:auto"><option value="">Tất cả trạng thái</option><?php foreach($labels as $key=>$label): ?><option value="<?= h($key) ?>" <?= $status===$key?'selected':'' ?>><?= h($label) ?></option><?php endforeach; ?></select><button class="btn" type="submit">Lọc</button></form></div><div class="table-wrap"><table><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Điện thoại</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th>Chi tiết</th></tr></thead><tbody><?php if(!$rows): ?><tr><td colspan="7" class="empty">Chưa có đơn hàng phù hợp.</td></tr><?php else: foreach($rows as $o): ?><tr><td><strong>#<?= (int)$o['id'] ?></strong></td><td><?= h($o['full_name']??'Tài khoản đã xóa') ?><div class="text-muted"><?= h($o['email']??'') ?></div></td><td><?= h($o['phone']) ?></td><td><?= h($o['created_at']) ?></td><td><?= h(money($o['total_amount'])) ?></td><td><span class="badge badge-<?= h($o['status']) ?>"><?= h($labels[$o['status']]??$o['status']) ?></span></td><td><a class="btn btn-small" href="<?= h(admin_url('orders/detail.php?id='.(int)$o['id'])) ?>">Xem đơn</a></td></tr><?php endforeach; endif; ?></tbody></table></div></div><?php admin_footer(); ?>
+$pageTitle = 'Quản lý Đơn hàng';
+require_once dirname(__DIR__) . '/_layout.php';
+
+$statusFilter = $_GET['status'] ?? '';
+$sql = "SELECT o.*, u.full_name, u.email FROM orders o
+        JOIN users u ON o.user_id = u.id WHERE 1=1";
+$params = [];
+if ($statusFilter) {
+    $sql .= " AND o.status = ?";
+    $params[] = $statusFilter;
+}
+$sql .= " ORDER BY o.created_at DESC";
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$statusList = ['pending','processing','shipping','delivered','cancelled'];
+?>
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-bag-check me-2 text-primary"></i>Đơn hàng</h5>
+</div>
+
+<!-- Filter tabs -->
+<div class="card mb-3">
+    <div class="card-body py-2 px-3">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/Web/admin/orders/index.php"
+               class="btn btn-sm <?= $statusFilter === '' ? 'btn-primary' : 'btn-outline-secondary' ?>">
+                Tất cả
+            </a>
+            <?php foreach ($statusList as $s): ?>
+            <a href="/Web/admin/orders/index.php?status=<?= $s ?>"
+               class="btn btn-sm <?= $statusFilter === $s ? 'btn-primary' : 'btn-outline-secondary' ?>">
+                <?= orderStatusLabel($s) ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="px-4" style="width:70px">Mã ĐH</th>
+                    <th>Khách hàng</th>
+                    <th>Địa chỉ giao</th>
+                    <th>Tổng tiền</th>
+                    <th>Thanh toán</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày đặt</th>
+                    <th class="text-center" style="width:90px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php if (empty($orders)): ?>
+                <tr><td colspan="8" class="text-center text-muted py-4">Không có đơn hàng nào</td></tr>
+            <?php else: foreach ($orders as $o):
+                $badgeColor = ['pending'=>'warning','processing'=>'info','shipping'=>'primary','delivered'=>'success','cancelled'=>'danger'];
+                $badge = $badgeColor[$o['status']] ?? 'secondary';
+            ?>
+                <tr>
+                    <td class="px-4 fw-bold">#<?= $o['id'] ?></td>
+                    <td>
+                        <div class="small fw-semibold"><?= htmlspecialchars($o['full_name']) ?></div>
+                        <div class="text-muted" style="font-size:.75rem"><?= htmlspecialchars($o['email']) ?></div>
+                    </td>
+                    <td class="small text-muted"><?= htmlspecialchars(truncate($o['shipping_address'], 40)) ?></td>
+                    <td class="text-danger fw-semibold small"><?= formatPrice($o['total_amount']) ?></td>
+                    <td class="small"><?= $o['payment_method'] === 'cod' ? 'Tiền mặt' : 'Chuyển khoản' ?></td>
+                    <td>
+                        <span class="badge bg-<?= $badge ?> badge-status">
+                            <?= orderStatusLabel($o['status']) ?>
+                        </span>
+                    </td>
+                    <td class="small text-muted"><?= formatDate($o['created_at']) ?></td>
+                    <td class="text-center">
+                        <a href="/Web/admin/orders/detail.php?id=<?= $o['id'] ?>"
+                           class="btn btn-sm btn-outline-primary py-0">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+            <?php endforeach; endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer text-muted small py-2 px-4">
+        Tổng: <strong><?= count($orders) ?></strong> đơn hàng
+    </div>
+</div>
+<?php require_once dirname(__DIR__) . '/_layout_end.php'; ?>
