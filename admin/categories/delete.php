@@ -1,2 +1,1 @@
-<?php
-require_once __DIR__ . '/../bootstrap.php'; require_admin();if($_SERVER['REQUEST_METHOD']!=='POST'){http_response_code(405);exit('Method Not Allowed');}verify_csrf();$id=filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);if(!$id){set_flash('error','ID danh mục không hợp lệ.');header('Location: '.admin_url('categories/index.php'));exit;}try{$st=$conn->prepare('DELETE FROM categories WHERE id=?');$st->execute([$id]);set_flash($st->rowCount()?'success':'warning',$st->rowCount()?'Đã xóa danh mục.':'Danh mục không tồn tại.');}catch(PDOException $e){set_flash('error','Không thể xóa danh mục lúc này.');}header('Location: '.admin_url('categories/index.php'));exit;
+
