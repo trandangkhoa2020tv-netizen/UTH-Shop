@@ -1,4 +1,61 @@
 <?php
-require_once __DIR__ . '/../bootstrap.php'; require_admin();$id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);if(!$id){set_flash('error','ID danh mục không hợp lệ.');header('Location: '.admin_url('categories/index.php'));exit;}$st=$conn->prepare('SELECT * FROM categories WHERE id=?');$st->execute([$id]);$category=$st->fetch(PDO::FETCH_ASSOC);if(!$category){set_flash('error','Không tìm thấy danh mục.');header('Location: '.admin_url('categories/index.php'));exit;}$error='';$name=$category['name'];$description=$category['description']??'';
-if($_SERVER['REQUEST_METHOD']==='POST'){verify_csrf();$name=trim($_POST['name']??'');$description=trim($_POST['description']??'');if($name==='')$error='Tên danh mục không được để trống.';else{try{$st=$conn->prepare('UPDATE categories SET name=?,description=? WHERE id=?');$st->execute([$name,$description!==''?$description:null,$id]);set_flash('success','Đã cập nhật danh mục.');header('Location: '.admin_url('categories/index.php'));exit;}catch(PDOException $e){$error='Không thể cập nhật danh mục.';}}}
-admin_header('Sửa danh mục'); ?><?php if($error): ?><div class="alert alert-error"><?= h($error) ?></div><?php endif; ?><section class="card"><form method="post"><input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>"><div class="form-group"><label for="name">Tên danh mục *</label><input class="form-control" id="name" name="name" maxlength="100" required value="<?= h($name) ?>"></div><div class="form-group"><label for="description">Mô tả</label><textarea class="form-control" id="description" name="description" rows="4"><?= h($description) ?></textarea></div><div class="form-actions"><button class="btn" type="submit">Lưu thay đổi</button><a class="btn btn-outline" href="<?= h(admin_url('categories/index.php')) ?>">Hủy</a></div></form></section><?php admin_footer(); ?>
+$pageTitle = 'Sửa Danh mục';
+require_once dirname(__DIR__) . '/_layout.php';
+
+$id = (int)($_GET['id'] ?? 0);
+$stmt = $conn->prepare("SELECT * FROM categories WHERE id = ?");
+$stmt->execute([$id]);
+$cat = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$cat) {
+    flashError('Không tìm thấy danh mục.');
+    header('Location: /Web/admin/categories/index.php');
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name'] ?? '');
+    $desc = trim($_POST['description'] ?? '');
+
+    if (empty($name)) {
+        $error = 'Tên danh mục không được để trống.';
+    } else {
+        $stmt = $conn->prepare("UPDATE categories SET name=?, description=? WHERE id=?");
+        $stmt->execute([$name, $desc, $id]);
+        flashSuccess("Cập nhật danh mục thành công!");
+        header('Location: /Web/admin/categories/index.php');
+        exit();
+    }
+}
+$cat['name']        = $_POST['name']        ?? $cat['name'];
+$cat['description'] = $_POST['description'] ?? $cat['description'];
+?>
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-pencil me-2 text-warning"></i>Sửa danh mục #<?= $id ?></h5>
+    <a href="/Web/admin/categories/index.php" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Quay lại
+    </a>
+</div>
+<div class="card" style="max-width:600px">
+    <div class="card-body p-4">
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger py-2"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Tên danh mục <span class="text-danger">*</span></label>
+                <input type="text" name="name" class="form-control"
+                       value="<?= htmlspecialchars($cat['name']) ?>" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Mô tả</label>
+                <textarea name="description" class="form-control" rows="3"><?= htmlspecialchars($cat['description'] ?? '') ?></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-warning text-white"><i class="bi bi-check-lg me-1"></i>Cập nhật</button>
+                <a href="/Web/admin/categories/index.php" class="btn btn-outline-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+<?php require_once dirname(__DIR__) . '/_layout_end.php'; ?>
