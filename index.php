@@ -1,6 +1,8 @@
 <?php
 require_once 'config/database.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/migrations/side_banners.php';
+require_once __DIR__ . '/includes/migrations/promo_marquee.php';
 
 // SQL truy vấn sản phẩm nổi bật
 $sqlProducts = "SELECT p.*, c.name AS category_name
@@ -47,13 +49,25 @@ require_once 'includes/header.php';
 
 <div class="uth-home">
 
-    <!-- Tiêu đề + slogan -->
-    <section class="uth-hero uth-container">
-        <h1>Welcome to <span>UTH Shop</span></h1>
-        <p>Điện thoại, laptop và phụ kiện công nghệ chính hãng, giá tốt mỗi ngày.</p>
-    </section>
+    <?php
+    $promoBanner = $conn->query(
+        'SELECT message, is_active FROM site_promo_banner WHERE id = 1'
+    )->fetch(PDO::FETCH_ASSOC);
+    ?>
+    <?php if ($promoBanner && (int)$promoBanner['is_active'] === 1 && trim($promoBanner['message']) !== ''): ?>
+        <?php $promoMessage = trim($promoBanner['message']); ?>
+        <section class="uth-promo-marquee uth-container" aria-label="Khuyến mãi và thông báo">
+            <p class="visually-hidden"><?= htmlspecialchars($promoMessage, ENT_QUOTES, 'UTF-8') ?></p>
+            <div class="uth-promo-marquee__viewport" aria-hidden="true">
+                <div class="uth-promo-marquee__track">
+                    <span><?= htmlspecialchars($promoMessage, ENT_QUOTES, 'UTF-8') ?></span>
+                    <span><?= htmlspecialchars($promoMessage, ENT_QUOTES, 'UTF-8') ?></span>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
 
-        <!-- Banner tự chuyển -->
+    <!-- Banner tự chuyển -->
     <?php
         $bannerSlides = [];
         try {
@@ -94,6 +108,15 @@ require_once 'includes/header.php';
             }
         }
 
+        $hasBannerOrientation = static function ($imagePath, $orientation) {
+            $dimensions = @getimagesize($imagePath);
+            if ($dimensions === false) {
+                return false;
+            }
+            return $orientation === 'landscape'
+                ? $dimensions[0] > $dimensions[1]
+                : $dimensions[1] > $dimensions[0];
+        };
         $uniqueBannerSlides = [];
         $seenBannerImages = [];
         foreach ($bannerSlides as $slide) {
@@ -101,7 +124,10 @@ require_once 'includes/header.php';
             if ($imageUrl === '') {
                 continue;
             }
-            $imagePath = __DIR__ . '/' . ltrim((string)$slide['image'], '/');
+            $imagePath = __DIR__ . '/' . ltrim(rawurldecode(substr($imageUrl, strlen('/Web/'))), '/');
+            if (!$hasBannerOrientation($imagePath, 'landscape')) {
+                continue;
+            }
             $imageHash = is_file($imagePath) ? hash_file('sha256', $imagePath) : false;
             $imageKey = $imageHash !== false ? $imageHash : $imageUrl;
             if (isset($seenBannerImages[$imageKey])) {
@@ -112,10 +138,41 @@ require_once 'includes/header.php';
             $uniqueBannerSlides[] = $slide;
         }
         $bannerSlides = $uniqueBannerSlides;
+        $sideBanners = $conn->query(
+            "SELECT placement, title, image, link_url
+             FROM site_side_banners
+             WHERE is_active = 1 AND image IS NOT NULL AND image <> ''"
+        )->fetchAll(PDO::FETCH_ASSOC);
+        $sideBannersByPosition = [];
+        foreach ($sideBanners as $sideBanner) {
+            $sideBanner['image_url'] = getBannerImage($sideBanner['image']);
+            $imagePath = __DIR__ . '/' . ltrim(rawurldecode(substr($sideBanner['image_url'], strlen('/Web/'))), '/');
+            if ($sideBanner['image_url'] !== '' && $hasBannerOrientation($imagePath, 'portrait')) {
+                $sideBannersByPosition[$sideBanner['placement']] = $sideBanner;
+            }
+        }
         ?>
-        <?php if ($bannerSlides): ?>
-        <section class="uth-container">
-            <div class="uth-carousel banner-container" data-banner-carousel role="region" aria-label="Banner quảng cáo" aria-roledescription="carousel">
+        <?php if ($bannerSlides || $sideBannersByPosition): ?>
+        <section class="uth-banner-stage uth-container" aria-label="Banner quảng cáo">
+            <?php foreach (['left' => 'trái', 'right' => 'phải'] as $position => $positionLabel): ?>
+                <?php if (isset($sideBannersByPosition[$position])): ?>
+                    <?php $sideBanner = $sideBannersByPosition[$position]; ?>
+                    <a class="uth-side-banner uth-side-banner--<?= htmlspecialchars($position, ENT_QUOTES, 'UTF-8') ?>"
+                       href="<?= htmlspecialchars($sideBanner['link_url'] ?: '/Web/products.php', ENT_QUOTES, 'UTF-8') ?>"
+                       aria-label="<?= htmlspecialchars($sideBanner['title'], ENT_QUOTES, 'UTF-8') ?>">
+                        <img src="<?= htmlspecialchars($sideBanner['image_url'], ENT_QUOTES, 'UTF-8') ?>"
+                             alt="<?= htmlspecialchars($sideBanner['title'], ENT_QUOTES, 'UTF-8') ?>"
+                             loading="lazy"
+                             onerror="this.onerror=null;this.src='/Web/image/no-image.svg'">
+                    </a>
+                <?php else: ?>
+                    <div class="uth-side-banner-placeholder uth-side-banner-placeholder--<?= htmlspecialchars($position, ENT_QUOTES, 'UTF-8') ?>">
+                        Banner dọc bên <?= htmlspecialchars($positionLabel, ENT_QUOTES, 'UTF-8') ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            <div class="uth-carousel banner-container" data-banner-carousel role="region" aria-label="Banner quảng cáo ngang" aria-roledescription="carousel">
+                <?php if ($bannerSlides): ?>
                 <div class="uth-carousel__viewport">
                     <div class="uth-carousel__track">
                         <?php foreach ($bannerSlides as $index => $slide): ?>
@@ -145,6 +202,9 @@ require_once 'includes/header.php';
                                     aria-current="<?= $index === 0 ? 'true' : 'false' ?>"></button>
                         <?php endforeach; ?>
                     </div>
+                <?php endif; ?>
+                <?php else: ?>
+                    <div class="uth-carousel__empty">Chưa có ảnh banner ngang hợp lệ. Vui lòng tải ảnh ngang trong trang quản trị.</div>
                 <?php endif; ?>
             </div>
         </section>

@@ -16,14 +16,16 @@ Website bán hàng trực tuyến được xây dựng bằng **PHP thuần, MyS
 - Xem trang chủ và danh sách sản phẩm.
 - Xem thông tin chi tiết sản phẩm.
 - Thêm sản phẩm vào giỏ hàng.
-- Đặt hàng trực tuyến.
-- Đăng ký, đăng nhập và đăng xuất tài khoản.
+- Đặt hàng trực tuyến bằng tiền mặt hoặc chuyển khoản.
+- Đăng ký, đăng nhập, đăng xuất và cập nhật hồ sơ (không đổi email); đổi mật khẩu cần mật khẩu hiện tại.
+- Đánh giá sản phẩm đã mua và đính kèm ảnh.
 
 ### ⚙️ Quản trị viên (Admin)
 - Quản lý danh mục sản phẩm (CRUD).
-- Quản lý sản phẩm (CRUD).
+- Quản lý sản phẩm, thông số kỹ thuật và nhiều ảnh (CRUD).
 - Quản lý tài khoản người dùng.
 - Quản lý đơn hàng.
+- Quản lý banner ngang/dọc và nội dung thanh thông báo chạy chữ.
 
 ## 📂 Cấu trúc dự án
 
@@ -66,8 +68,9 @@ Web/
 │   └── js/
 │       └── main.js                     # Tương tác giao diện như giỏ hàng, menu và nút lên đầu trang
 ├── config/
-│   ├── database.php                    # Cấu hình kết nối MySQL dùng bởi ứng dụng
-│   └── database_hosting.php            # Cấu hình kết nối MySQL dành cho môi trường hosting
+│   ├── database.php                    # Kết nối MySQL dùng bởi ứng dụng
+│   ├── database.local.php.example      # Mẫu cấu hình local (sao chép và điền thông tin)
+│   └── database_connection.php         # Đọc cấu hình và mở kết nối PDO
 ├── image/                              # Ảnh tĩnh: logo, banner và ảnh sản phẩm mẫu
 ├── includes/
 │   ├── auth.php                        # Session, đăng nhập/đăng xuất và phân quyền
@@ -81,13 +84,16 @@ Web/
 │   └── .htaccess                       # Tắt liệt kê thư mục và chặn thực thi tệp script đã tải lên
 ├── cart.php                            # Xem, cập nhật và xóa sản phẩm trong giỏ hàng
 ├── checkout.php                        # Nhập thông tin giao hàng và tạo đơn hàng
-├── database.sql                        # Tạo cấu trúc cơ sở dữ liệu và dữ liệu mẫu
+├── database.sql                        # Chỉ tạo database và cấu trúc bảng
+├── database.seed.sql                   # Dữ liệu mẫu tùy chọn, không tạo tài khoản admin
 ├── index.php                           # Trang chủ, danh mục, banner và sản phẩm
+├── account.php                         # Cập nhật hồ sơ và đổi mật khẩu
 ├── login.php                           # Đăng nhập khách hàng
 ├── logout.php                          # Đăng xuất tài khoản
 ├── orders.php                          # Lịch sử đơn hàng của khách hàng
 ├── product_detail.php                  # Chi tiết sản phẩm và lựa chọn ảnh
 ├── products.php                        # Danh sách, tìm kiếm và lọc sản phẩm
+├── reviews.php                         # Gửi đánh giá sản phẩm đã mua
 ├── register.php                        # Đăng ký tài khoản khách hàng
 └── README.md                           # Giới thiệu, cấu trúc và hướng dẫn cài đặt dự án
 ```
@@ -99,19 +105,27 @@ Web/
 - Khởi động **Apache** và **MySQL** trong XAMPP Control Panel.
 
 ### Bước 2: Đưa dự án vào XAMPP
-Sao chép thư mục `Web` vào:
+Sao chép thư mục dự án vào thư mục `htdocs`, ví dụ:
 
 ```text
-D:\Xampp\htdocs\Web\
+C:\xampp\htdocs\Web\
 ```
 
-### Bước 3: Tạo cơ sở dữ liệu
-1. Truy cập [http://localhost/phpmyadmin](http://localhost/phpmyadmin).
-2. Tạo hoặc chọn database theo cấu hình của dự án.
-3. Import file `database.sql`.
-4. Kiểm tra thông tin kết nối trong thư mục `config/`.
+### Bước 3: Cấu hình kết nối database
+Có thể cấu hình bằng biến môi trường `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, hoặc tạo file local không được Git theo dõi:
 
-### Bước 4: Truy cập website
+1. Sao chép `config/database.local.php.example` thành `config/database.local.php`.
+2. Điền thông tin kết nối MySQL trong file local. Không commit file này hoặc mật khẩu database.
+
+### Bước 4: Tạo database và bảng
+1. Tạo database rỗng bằng phpMyAdmin hoặc MySQL.
+2. Chọn database đó rồi import `database.sql` **chỉ khi cài mới**.
+3. `database.sql` chỉ tạo cấu trúc; không xóa dữ liệu hay tạo tài khoản admin. Không import lại như cách cập nhật một database đang sử dụng. Sao lưu database trước mọi thao tác thay đổi schema.
+4. Nếu muốn có sản phẩm mẫu, import `database.seed.sql` sau schema. Đây là tùy chọn; script không tạo admin và chỉ thêm dữ liệu mẫu còn thiếu.
+
+Các migration của tính năng mới được chạy tự động khi ứng dụng khởi tạo. Để cấp quyền quản trị, đăng ký tài khoản trước rồi nhờ người có quyền database nâng vai trò tài khoản đó lên `admin`; không dùng tài khoản/mật khẩu mẫu được chia sẻ công khai.
+
+### Bước 5: Truy cập website
 
 Mở trình duyệt và truy cập:
 
@@ -120,13 +134,15 @@ Mở trình duyệt và truy cập:
 
 *Đường dẫn có thể thay đổi tùy theo cấu trúc thư mục và cấu hình thực tế.*
 
-## 🔐 Tài khoản mẫu
+## 🧪 Kiểm tra nhanh
 
-| Vai trò | Email | Mật khẩu |
-|---|---|---|
-| Admin | `admin@gmail.com` | `123456` |
+Chạy các kiểm tra PHP độc lập, không kết nối hoặc thay đổi database:
 
-*Đây là tài khoản phục vụ mục đích phát triển và kiểm thử. Không sử dụng mật khẩu mẫu trên môi trường thực tế.*
+```bash
+php tests/run.php
+```
+
+Các luồng đăng nhập/đăng xuất, đặt hàng, đánh giá và tải ảnh vẫn cần được kiểm thử tích hợp trên một database thử nghiệm riêng trước khi phát hành.
 
 ## 🎯 Mục tiêu dự án
 

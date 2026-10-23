@@ -43,10 +43,17 @@ if ($slideCount === 0) {
 
 $knownImages = $conn->query('SELECT image FROM site_banner_slides')->fetchAll(PDO::FETCH_COLUMN);
 $knownImages = array_fill_keys($knownImages, true);
+$sideBannerImages = $conn->query(
+    "SELECT image FROM site_side_banners WHERE image IS NOT NULL AND image <> ''"
+)->fetchAll(PDO::FETCH_COLUMN);
+foreach ($sideBannerImages as $sideBannerImage) {
+    $knownImages[$sideBannerImage] = true;
+}
 $uploadDirectory = dirname(__DIR__, 3) . '/uploads/banners';
 $orphanImages = [];
 foreach (glob($uploadDirectory . '/*') ?: [] as $imagePath) {
-    if (!is_file($imagePath) || getimagesize($imagePath) === false) {
+    $dimensions = is_file($imagePath) ? @getimagesize($imagePath) : false;
+    if ($dimensions === false || $dimensions[0] <= $dimensions[1]) {
         continue;
     }
     $relativePath = 'uploads/banners/' . basename($imagePath);

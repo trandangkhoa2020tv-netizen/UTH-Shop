@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/auth.php';
 
 if (!empty($_SESSION['user_id'])) {
     header('Location: index.php');
@@ -29,17 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
-            session_regenerate_id(true);
+            loginUser($user);
             $_SESSION['user'] = [
                 'id' => (int)$user['id'],
                 'fullname' => $user['full_name'],
                 'email' => $user['email'],
                 'role' => $user['role'],
             ];
-            $_SESSION['user_id'] = (int)$user['id'];
-            $_SESSION['user_name'] = $user['full_name'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role'];
 
             $redirect = (string)($_GET['redirect'] ?? '');
             $redirectPath = $redirect;

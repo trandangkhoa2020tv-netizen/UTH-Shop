@@ -1,0 +1,21 @@
+# Local environment and database overrides
+/.env
+/.env.*
+!/.env.example
+/config/database.local.php
+/config/database_hosting.local.php
+
+# Runtime uploads; files already tracked by Git remain tracked
+/uploads/products/
+/uploads/banners/
+/uploads/reviews/
+
+# Local logs and tooling
+*.log
+/error_log
+/.vscode/
+/.idea/
+/vendor/
+/node_modules/
+Thumbs.db
+.DS_Store

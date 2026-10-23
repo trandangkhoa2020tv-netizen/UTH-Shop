@@ -25,6 +25,18 @@ if ($userId === false || $userId < 1) {
     exit();
 }
 
+$stmtCustomer = $conn->prepare('SELECT full_name, phone, address FROM users WHERE id = ?');
+$stmtCustomer->execute([$userId]);
+$customer = $stmtCustomer->fetch(PDO::FETCH_ASSOC);
+if (!$customer) {
+    http_response_code(404);
+    exit('Không tìm thấy thông tin tài khoản.');
+}
+
+$customerName = (string)$customer['full_name'];
+$customerPhone = (string)($customer['phone'] ?? '');
+$customerAddress = (string)($customer['address'] ?? '');
+
 $cartItems = [];
 $totalAmount = 0;
 foreach ($_SESSION['cart'] as $key => $item) {
@@ -73,10 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Phiên gửi biểu mẫu không hợp lệ. Vui lòng tải lại trang và thử lại.';
     }
 
-    $customer_name  = trim($_POST['customer_name'] ?? '');
-    $customer_phone = trim($_POST['customer_phone'] ?? '');
-    $customer_address = trim($_POST['customer_address'] ?? '');
+    $customer_name  = trim((string)($_POST['customer_name'] ?? ''));
+    $customer_phone = trim((string)($_POST['customer_phone'] ?? ''));
+    $customer_address = trim((string)($_POST['customer_address'] ?? ''));
+    $customerName = $customer_name;
+    $customerPhone = $customer_phone;
+    $customerAddress = $customer_address;
     $note           = trim($_POST['note'] ?? '');
+    $paymentMethod = $_POST['payment_method'] ?? 'cod';
 
     if ($customer_name === '') {
         $errors[] = "Vui lòng nhập họ và tên người nhận.";
@@ -86,6 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($customer_address === '') {
         $errors[] = "Vui lòng nhập địa chỉ giao hàng cụ thể.";
+    }
+    if ($paymentMethod !== 'cod') {
+        $errors[] = 'Thanh toán ngân hàng và ví điện tử hiện chưa khả dụng và sẽ được phát triển trong tương lai. Vui lòng chọn tiền mặt khi nhận hàng.';
     }
 
     if (empty($errors) && !empty($cartItems)) {
@@ -118,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $orderTotal,
                 'pending',
                 "Người nhận: {$customer_name}\n{$customer_address}",
-                'cod',
+                $paymentMethod,
                 $customer_phone,
                 $note,
             ]);
@@ -180,27 +199,48 @@ include_once __DIR__ . '/includes/header.php';
                     <form action="checkout.php" method="POST">
                         <?= csrfInput() ?>
                         <div class="mb-3">
-                            <label class="form-label">Họ và tên *</label>
+                            <label class="form-label" for="customer-name">Họ và tên *</label>
                             <input type="text" name="customer_name" class="form-control" required
-                                   value="<?= htmlspecialchars($_POST['customer_name'] ?? ($_SESSION['user_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Nguyễn Văn A">
+                                   id="customer-name" value="<?= htmlspecialchars($customerName, ENT_QUOTES, 'UTF-8') ?>" placeholder="Nguyễn Văn A">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Số điện thoại *</label>
+                            <label class="form-label" for="customer-phone">Số điện thoại *</label>
                             <input type="tel" name="customer_phone" class="form-control" required
-                                   value="<?= htmlspecialchars($_POST['customer_phone'] ?? ($_SESSION['user_phone'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="0901234567">
+                                   id="customer-phone" value="<?= htmlspecialchars($customerPhone, ENT_QUOTES, 'UTF-8') ?>" placeholder="0901234567">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Địa chỉ nhận hàng cụ thể *</label>
-                            <textarea name="customer_address" class="form-control" rows="3" required
-                                      placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành"><?= htmlspecialchars($_POST['customer_address'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                            <label class="form-label" for="customer-address">Địa chỉ nhận hàng cụ thể *</label>
+                            <textarea name="customer_address" id="customer-address" class="form-control" rows="3" required
+                                      placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành"><?= htmlspecialchars($customerAddress, ENT_QUOTES, 'UTF-8') ?></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Ghi chú giao hàng (nếu có)</label>
                             <textarea name="note" class="form-control" rows="2" placeholder="Giao giờ hành chính, gọi trước khi đến..."><?= htmlspecialchars($_POST['note'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                         </div>
+
+                        <fieldset class="mb-3">
+                            <legend class="form-label fs-6">Phương thức thanh toán</legend>
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="payment-cod" value="cod" checked>
+                                    <label class="form-check-label" for="payment-cod">
+                                        <i class="bi bi-cash-coin me-1" aria-hidden="true"></i>Tiền mặt khi nhận hàng
+                                    </label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="payment-bank-transfer" value="bank_transfer">
+                                    <label class="form-check-label" for="payment-bank-transfer">
+                                        <i class="bi bi-bank me-1" aria-hidden="true"></i>Ví điện tử ngân hàng
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning mt-2 mb-0" id="payment-unavailable-message" role="status" aria-live="polite" hidden>
+                                Chức năng thanh toán ví điện tử và ngân hàng hiện chưa khả dụng, sẽ được phát triển trong tương lai. Vui lòng chọn tiền mặt khi nhận hàng.
+                            </div>
+                        </fieldset>
 
                         <button type="submit" class="btn btn-success btn-lg w-100 mt-3">Xác nhận đặt hàng</button>
                     </form>
@@ -235,5 +275,16 @@ include_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+    const cashPaymentOption = document.getElementById('payment-cod');
+    const transferPaymentOption = document.getElementById('payment-bank-transfer');
+    const unavailablePaymentMessage = document.getElementById('payment-unavailable-message');
+
+    transferPaymentOption.addEventListener('change', () => {
+        unavailablePaymentMessage.hidden = false;
+        cashPaymentOption.checked = true;
+    });
+</script>
 
 <?php include_once __DIR__ . '/includes/footer.php'; ?>

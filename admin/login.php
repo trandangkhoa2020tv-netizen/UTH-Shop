@@ -12,6 +12,7 @@ if (isAdmin()) {
 }
 
 $error = '';
+$email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
         $error = 'Phiên đăng nhập không hợp lệ. Vui lòng tải lại trang.';
@@ -23,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $admin = $statement->fetch(PDO::FETCH_ASSOC);
         if ($admin && password_verify($password, $admin['password'])) {
             loginUser($admin);
+            $_SESSION['user'] = [
+                'id' => (int)$admin['id'],
+                'fullname' => $admin['full_name'],
+                'email' => $admin['email'],
+                'role' => $admin['role'],
+            ];
             header('Location: /Web/admin/index.php');
             exit;
         }
@@ -37,21 +44,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng nhập quản trị | UTH Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/Web/assets/css/style.css?v=<?= filemtime(dirname(__DIR__) . '/assets/css/style.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-light">
-    <main class="container min-vh-100 d-flex align-items-center justify-content-center">
-        <form method="post" class="card shadow-sm p-4 w-100" style="max-width: 420px">
-            <h1 class="h4 fw-bold mb-1">Đăng nhập quản trị</h1>
-            <p class="text-secondary mb-4">UTH Shop</p>
-            <?php if ($error !== ''): ?><div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
-            <?= csrfInput() ?>
-            <label class="form-label" for="email">Email quản trị</label>
-            <input class="form-control mb-3" id="email" name="email" type="email" autocomplete="username" required>
-            <label class="form-label" for="password">Mật khẩu</label>
-            <input class="form-control mb-4" id="password" name="password" type="password" autocomplete="current-password" required>
-            <button class="btn btn-primary w-100" type="submit">Đăng nhập</button>
-            <a class="text-center mt-3" href="/Web/index.php">Quay lại cửa hàng</a>
-        </form>
+<body>
+    <main class="auth-page admin-auth-page">
+        <section class="auth-card admin-auth-card">
+            <a class="auth-brand admin-auth-brand" href="/Web/index.php">
+                <span class="auth-brand__icon"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i></span>
+                <span>UTH <strong>Shop</strong></span>
+            </a>
+            <div class="auth-card__heading">
+                <span class="auth-card__eyebrow">KHU VỰC QUẢN TRỊ</span>
+                <h1 class="h2" id="admin-login-title">Đăng nhập quản trị</h1>
+                <p>Đăng nhập để quản lý cửa hàng và đơn hàng.</p>
+            </div>
+            <?php if ($error !== ''): ?>
+                <div class="alert alert-danger auth-alert" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+            <?php endif; ?>
+            <form method="post" class="auth-form" aria-labelledby="admin-login-title">
+                <?= csrfInput() ?>
+                <div class="mb-3">
+                    <label class="form-label" for="email">Email quản trị</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-envelope" aria-hidden="true"></i>
+                        <input class="form-control" id="email" name="email" type="email" autocomplete="username" maxlength="100" required autofocus value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="password">Mật khẩu</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-lock" aria-hidden="true"></i>
+                        <input class="form-control" id="password" name="password" type="password" autocomplete="current-password" required>
+                        <button class="auth-password-toggle" type="button" data-password-toggle="password" aria-label="Hiện mật khẩu">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-primary auth-submit" type="submit">Đăng nhập <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></button>
+            </form>
+            <a class="auth-back mt-3" href="/Web/index.php"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Quay lại cửa hàng</a>
+        </section>
     </main>
+    <script src="/Web/assets/js/main.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/main.js') ?>"></script>
 </body>
 </html>

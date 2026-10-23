@@ -80,20 +80,45 @@
     box-shadow: 0 2px 8px rgba(15, 23, 42, .12);
 }
 .product-specs {
-    padding: .9rem 1rem;
-    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    border: 1px solid #dfe3e8;
     border-radius: 10px;
     background: #fff;
 }
-.product-specs__list { display: grid; gap: .4rem; }
+.product-specs > h2 { padding: .85rem 1rem 0; }
+.product-specs__list { display: block; }
 .product-specs__row {
     display: grid;
-    grid-template-columns: minmax(130px, .8fr) minmax(0, 1.2fr);
-    gap: .75rem;
+    grid-template-columns: minmax(130px, 30%) minmax(0, 1fr);
     font-size: .9rem;
 }
-.product-specs__row dt { color: #64748b; font-weight: 500; }
-.product-specs__row dd { margin: 0; color: #1e293b; font-weight: 600; }
+.product-specs__row:not(:last-child) { border-bottom: 1px solid #dfe3e8; }
+.product-specs__row dt,
+.product-specs__row dd { padding: .55rem .85rem; }
+.product-specs__row dt {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    border-right: 1px solid #dfe3e8;
+    background: #f1f1f1;
+    color: #555;
+    font-weight: 500;
+}
+.product-specs__row dd {
+    margin: 0;
+    background: #fff;
+    color: #555;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+.product-review__image {
+    display: block;
+    width: 96px;
+    height: 96px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    object-fit: cover;
+}
 .product-upload-preview {
     display: flex;
     flex-wrap: wrap;
@@ -155,8 +180,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---- 3. NAVBAR ---- */
 #main-navbar {
-    border-bottom: 1px solid var(--gray-200);
-    padding: .8rem 0;
+    margin: .5rem 1rem 0;
+    padding: .4rem 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, .08);
 }
 
 #main-navbar .navbar-brand {
@@ -527,6 +556,9 @@ h1, h2, h3, h4, h5, h6 {
     background: #fff;
     box-shadow: 0 20px 55px rgba(15, 23, 42, .10);
 }
+.admin-auth-page { padding-top: 2rem; padding-bottom: 2rem; }
+.admin-auth-card { max-width: 460px; }
+.admin-auth-brand { margin-bottom: 2rem; }
 .auth-card__heading { margin-bottom: 1.5rem; }
 .auth-card__heading h2 {
     margin: .45rem 0 .25rem;

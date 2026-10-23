@@ -85,6 +85,7 @@ function requireAdmin() {
 function loginUser($user) {
     // Tái sinh session ID để chống Session Fixation
     session_regenerate_id(true);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
     $_SESSION['user_id']    = $user['id'];
     $_SESSION['user_name']  = $user['full_name'];

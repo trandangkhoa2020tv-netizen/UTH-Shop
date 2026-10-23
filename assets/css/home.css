@@ -9,35 +9,117 @@ body { background-color: #f8fafc !important; }
 }
 .uth-container { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
 
-/* ----- Tiêu đề + slogan ----- */
-.uth-hero { text-align: center; padding: 48px 0 32px; }
-.uth-hero h1 {
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 700; color: #0f172a; margin: 0 0 12px;
+/* ----- Thanh khuyến mãi chạy chữ ----- */
+.uth-promo-marquee {
+    margin: 22px auto 24px;
+    overflow: hidden;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #eff6ff, #dbeafe);
+    color: #334155;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, .08);
 }
-.uth-hero h1 span {
-    background: linear-gradient(90deg, #2563eb, #0ea5e9);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
+.uth-promo-marquee__viewport { overflow: hidden; padding: 11px 0; }
+.uth-promo-marquee__track {
+    display: flex;
+    width: max-content;
+    animation: uth-promo-scroll 28s linear infinite;
 }
-.uth-hero p {
-    color: #64748b; font-size: 1.1rem; font-weight: 500; margin: 0;
+.uth-promo-marquee__track span {
+    flex: 0 0 auto;
+    padding-right: 4rem;
+    font-size: .96rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.uth-promo-marquee:hover .uth-promo-marquee__track { animation-play-state: paused; }
+@keyframes uth-promo-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .uth-promo-marquee__viewport { overflow-x: auto; }
+    .uth-promo-marquee__track { animation: none; }
+    .uth-promo-marquee__track span:nth-child(2) { display: none; }
 }
 
 /* ----- Banner carousel ----- */
+.uth-banner-stage {
+    display: grid;
+    grid-template-areas: "left center right";
+    grid-template-columns: minmax(120px, 160px) minmax(0, 920px) minmax(120px, 160px);
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 0 auto 32px;
+}
 .uth-carousel {
+    grid-area: center;
     position: relative;
     width: 100%;
-    max-width: 920px;
+    max-width: none;
     aspect-ratio: 23 / 10;
     height: auto;
     margin-right: auto;
     margin-left: auto;
-    margin-bottom: 32px;
+    margin-bottom: 0;
     overflow: hidden;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
     background: #fff;
     box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+}
+.uth-side-banner {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    aspect-ratio: 2 / 5;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+}
+.uth-side-banner--left,
+.uth-side-banner-placeholder--left { grid-area: left; }
+.uth-side-banner--right,
+.uth-side-banner-placeholder--right { grid-area: right; }
+.uth-side-banner img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.uth-side-banner-placeholder {
+    display: flex;
+    min-width: 0;
+    width: 100%;
+    aspect-ratio: 2 / 5;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 14px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: .85rem;
+    text-align: center;
+}
+.uth-carousel__empty {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    padding: 24px;
+    color: #64748b;
+    font-size: .95rem;
+    text-align: center;
+}
+@media (max-width: 991.98px) {
+    .uth-banner-stage { display: block; }
+    .uth-side-banner,
+    .uth-side-banner-placeholder { display: none; }
+    .uth-carousel { max-width: 920px; margin-bottom: 32px; }
 }
 .uth-carousel__viewport,
 .uth-carousel__track,

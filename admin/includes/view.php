@@ -4,6 +4,8 @@ function adminEscape($value) {
 }
 
 function adminHeader($title) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
     ?>
     <!doctype html>
     <html lang="vi">
@@ -16,7 +18,6 @@ function adminHeader($title) {
         <link href="/Web/assets/css/style.css" rel="stylesheet">
         <style>
             body.admin-body { background: #f1f5f9; min-height: 100vh; display: block; }
-            .admin-topbar { border-bottom: 1px solid var(--gray-200); padding: .8rem 0; }
             .admin-main { max-width: 1240px; }
             .admin-topbar .navbar-brand { margin-right: 1.25rem; }
             .admin-brand-logo { width: 120px; height: 50px; object-fit: cover; object-position: center; }
@@ -24,6 +25,7 @@ function adminHeader($title) {
             .admin-topbar .nav-link { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; }
             .admin-topbar .nav-link > i { font-size: .95rem; }
             .admin-logout { white-space: nowrap; }
+            .admin-logout-form { margin: 0; }
             .admin-page-intro { color: #64748b; margin-top: -.9rem; margin-bottom: 1.25rem; }
             .admin-body main > h1 { padding-bottom: .85rem; border-bottom: 1px solid #e2e8f0; letter-spacing: -.025em; }
             .admin-stat-card { border: 0; border-radius: 1rem; box-shadow: 0 4px 16px rgba(15,23,42,.06); }
@@ -43,11 +45,15 @@ function adminHeader($title) {
             .admin-image-preview { width: 112px; height: 90px; object-fit: contain; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: .5rem; }
             .admin-banner-preview { width: 100%; aspect-ratio: 23 / 10; overflow: hidden; border-radius: .5rem; background: #f8fafc; }
             .admin-banner-preview img { display: block; width: 100%; height: 100%; object-fit: cover; }
+            .admin-side-banner-preview { width: 100%; max-width: 150px; aspect-ratio: 2 / 5; overflow: hidden; border: 1px solid #e2e8f0; border-radius: .5rem; background: #f8fafc; }
+            .admin-side-banner-preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
             @media (max-width: 991.98px) {
                 .admin-topbar .navbar-collapse { padding: .75rem 0 .5rem; }
                 .admin-topbar .navbar-nav { gap: .2rem; padding-bottom: .5rem; }
                 .admin-topbar .nav-link { width: 100%; margin: 0; }
                 .admin-topbar .admin-logout { margin-top: .35rem; }
+                .admin-topbar .admin-logout-form { width: 100%; }
+                .admin-topbar .admin-logout-form .admin-logout { width: 100%; }
             }
             @media (max-width: 575.98px) {
                 .admin-main { padding-left: 1rem; padding-right: 1rem; }
@@ -89,7 +95,10 @@ function adminHeader($title) {
                         <?php endforeach; ?>
                         <a class="nav-link admin-store-link" href="/Web/index.php" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i>Xem cửa hàng</a>
                     </div>
-                    <a class="btn btn-primary btn-sm px-3 admin-logout" href="/Web/admin/logout.php"><i class="bi bi-box-arrow-right me-1"></i>Đăng xuất</a>
+                    <form method="post" action="/Web/admin/logout.php" class="admin-logout-form">
+                        <?= csrfInput() ?>
+                        <button class="btn btn-primary btn-sm px-3 admin-logout" type="submit"><i class="bi bi-box-arrow-right me-1"></i>Đăng xuất</button>
+                    </form>
                 </div>
             </div>
         </nav>

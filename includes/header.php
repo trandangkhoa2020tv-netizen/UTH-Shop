@@ -45,7 +45,7 @@ $cartCount = getCartCount();
 <body>
 
 <!-- ===================== NAVBAR ===================== -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top" id="main-navbar">
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top" id="main-navbar">
     <div class="container">
 
         <!-- LOGO -->
@@ -123,15 +123,23 @@ $cartCount = getCartCount();
                         </li>
                         <?php endif; ?>
                         <li>
+                            <a class="dropdown-item" href="/Web/account.php" id="link-account">
+                                <i class="bi bi-person-vcard me-2"></i>Thông tin tài khoản
+                            </a>
+                        </li>
+                        <li>
                             <a class="dropdown-item" href="/Web/orders.php" id="link-orders">
                                 <i class="bi bi-bag-check me-2"></i>Đơn hàng của tôi
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item text-danger" href="/Web/logout.php" id="link-logout">
-                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                            </a>
+                            <form method="post" action="/Web/logout.php">
+                                <?= csrfInput() ?>
+                                <button class="dropdown-item text-danger" type="submit" id="link-logout">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </li>

@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     address TEXT,
+    gender VARCHAR(20) DEFAULT NULL,
+    birth_date DATE DEFAULT NULL,
     role ENUM('admin', 'user') DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -26,6 +28,7 @@ CREATE TABLE IF NOT EXISTS products (
     brand VARCHAR(50) DEFAULT NULL,
     cpu VARCHAR(100) DEFAULT NULL,
     ram VARCHAR(50) DEFAULT NULL,
+    specifications MEDIUMTEXT DEFAULT NULL,
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
     stock INT DEFAULT 0,
@@ -64,6 +67,22 @@ CREATE TABLE IF NOT EXISTS site_banner_slides (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS site_side_banners (
+    placement ENUM('left', 'right') PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    image VARCHAR(255) DEFAULT NULL,
+    link_url VARCHAR(500) NOT NULL DEFAULT '/Web/products.php',
+    is_active TINYINT(1) NOT NULL DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS site_promo_banner (
+    id TINYINT UNSIGNED PRIMARY KEY,
+    message VARCHAR(500) NOT NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -87,34 +106,26 @@ CREATE TABLE IF NOT EXISTS order_items (
     CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
-DELETE FROM order_items;
-DELETE FROM orders;
-DELETE FROM products;
-DELETE FROM categories;
+CREATE TABLE IF NOT EXISTS product_reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    user_id INT NOT NULL,
+    order_id INT NOT NULL,
+    rating TINYINT UNSIGNED NOT NULL,
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_product_review_order (order_id, product_id),
+    INDEX idx_product_reviews_product_created (product_id, created_at),
+    CONSTRAINT fk_product_reviews_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    CONSTRAINT fk_product_reviews_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_product_reviews_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
 
-INSERT INTO categories (id, name, description) VALUES
-(1, 'Điện thoại', 'Các loại điện thoại thông minh mới nhất'),
-(2, 'Laptop', 'Laptop học tập, văn phòng và gaming'),
-(3, 'Phụ kiện', 'Tai nghe, chuột, bàn phím, sạc dự phòng'),
-(4, 'Âm thanh', 'Loa, tai nghe, mic thu âm'),
-(5, 'Đồng hồ', 'Đồng hồ thông minh, camera giám sát'),
-(6, 'PC - Màn hình', 'Máy tính để bàn, màn hình, máy in'),
-(7, 'Tivi', 'Tivi thông minh, màn hình lớn')
-ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description);
-
-INSERT INTO products (category_id, name, brand, cpu, ram, description, price, stock, image) VALUES
-(1, 'iPhone 13', 'Apple', NULL, NULL, 'Điện thoại Apple iPhone 13, thiết kế sang trọng, hiệu năng ổn định.', 15990000, 10, 'iphone13.jpg'),
-(1, 'Samsung Galaxy S23', 'Samsung', NULL, NULL, 'Điện thoại Samsung cao cấp với màn hình đẹp và camera tốt.', 18990000, 8, 's23.jpg'),
-(2, 'MacBook Air M2', 'Apple', 'M2', '8GB', 'Laptop mỏng nhẹ, pin lâu, phù hợp học tập và làm việc.', 28990000, 5, 'macbookairm2.jpg'),
-(2, 'Dell XPS 13', 'Dell', 'i7', '16GB', 'Laptop cao cấp màn hình vô cực, mỏng nhẹ nhất thế giới.', 35000000, 3, 'Dell_XPS_13.webp'),
-(2, 'HP Spectre x360', 'HP', 'i7', '16GB', 'Laptop xoay gập 360 độ, thiết kế sang trọng đẳng cấp.', 32000000, 4, 'HP_Spectre_x360.webp'),
-(2, 'ASUS ROG Zephyrus', 'ASUS', 'i9', '32GB', 'Laptop Gaming đỉnh cao, màn hình 165Hz chuyên game.', 45000000, 2, 'ASUS_ROG_Zephyrus.webp'),
-(3, 'Tai nghe Bluetooth', 'Sony', NULL, NULL, 'Tai nghe không dây tiện lợi, âm thanh rõ ràng.', 990000, 20, 'tainghe.jpg'),
-(4, 'Loa Bluetooth Marshall', 'Marshall', NULL, NULL, 'Âm thanh cực đỉnh, phong cách retro đẳng cấp.', 5500000, 12, 'Loa_Bluetooth_Marshall.webp'),
-(5, 'Apple Watch Series 9', 'Apple', NULL, NULL, 'Theo dõi sức khỏe chuyên sâu, thiết kế thời thượng.', 10500000, 15, 'Apple_Watch_Series_9.webp'),
-(6, 'Màn hình Dell UltraSharp', 'Dell', NULL, NULL, 'Độ phân giải 4K, màu sắc chuẩn xác cho đồ họa.', 8200000, 7, 'Man_hinh_Dell_UltraSharp.webp'),
-(7, 'Tivi Sony 4K 55 inch', 'Sony', NULL, NULL, 'Hình ảnh sắc nét, âm thanh vòm sống động.', 14500000, 4, 'TV_sony_4k.jpg');
-
-INSERT INTO users (full_name, email, password, phone, address, role)
-SELECT 'Administrator', 'admin@gmail.com', '$2y$10$5qHiOvHVQzhbe9vfjGdiduGz6pPTPa8a.a7lwcNgbdazb4zaPQQqq', '0123456789', 'TP.HCM', 'admin'
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@gmail.com');
+CREATE TABLE IF NOT EXISTS product_review_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    review_id INT NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_product_review_images_review (review_id),
+    CONSTRAINT fk_product_review_images_review FOREIGN KEY (review_id) REFERENCES product_reviews(id) ON DELETE CASCADE
+);

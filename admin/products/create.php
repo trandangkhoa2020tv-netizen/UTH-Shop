@@ -2,17 +2,28 @@
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/view.php';
 require_once dirname(__DIR__) . '/includes/media.php';
+require_once dirname(__DIR__, 2) . '/includes/product_specifications.php';
+require_once dirname(__DIR__, 2) . '/includes/migrations/product_specifications.php';
 
 $categories = $conn->query('SELECT id, name FROM categories ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
 $error = '';
-$values = ['name' => '', 'category_id' => '', 'brand' => '', 'cpu' => '', 'ram' => '', 'description' => '', 'price' => '', 'stock' => '0'];
+$values = ['name' => '', 'category_id' => '', 'brand' => '', 'description' => '', 'price' => '', 'stock' => '0'];
+$specifications = [['name' => '', 'value' => '']];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($values as $key => $_) {
         $values[$key] = trim((string)($_POST[$key] ?? ''));
     }
+    $specificationError = '';
+    $specifications = normalizeProductSpecifications(
+        $_POST['specification_names'] ?? [],
+        $_POST['specification_values'] ?? [],
+        $specificationError
+    );
     if (!verifyCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
         $error = 'Phiên gửi biểu mẫu không hợp lệ. Vui lòng tải lại trang.';
+    } elseif ($specificationError !== '') {
+        $error = $specificationError;
     } elseif ($values['name'] === '' || !is_numeric($values['price']) || (float)$values['price'] < 0 ||
         filter_var($values['stock'], FILTER_VALIDATE_INT) === false || (int)$values['stock'] < 0) {
         $error = 'Nhập tên, giá hợp lệ và số lượng tồn kho không âm.';
@@ -27,15 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $categoryId = $values['category_id'] !== '' ? (int)$values['category_id'] : null;
             $statement = $conn->prepare(
-                'INSERT INTO products (category_id, name, brand, cpu, ram, description, price, stock, image)
-                 VALUES (:category_id, :name, :brand, :cpu, :ram, :description, :price, :stock, :image)'
+                'INSERT INTO products (category_id, name, brand, specifications, description, price, stock, image)
+                 VALUES (:category_id, :name, :brand, :specifications, :description, :price, :stock, :image)'
             );
             $statement->execute([
                 ':category_id' => $categoryId,
                 ':name' => $values['name'],
                 ':brand' => $values['brand'] ?: null,
-                ':cpu' => $values['cpu'] ?: null,
-                ':ram' => $values['ram'] ?: null,
+                ':specifications' => $specifications
+                    ? json_encode($specifications, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                    : null,
                 ':description' => $values['description'] ?: null,
                 ':price' => (float)$values['price'],
                 ':stock' => (int)$values['stock'],
@@ -113,15 +125,25 @@ adminHeader('Thêm sản phẩm');
             <input class="form-control" id="brand" name="brand" maxlength="50" placeholder="Ví dụ: Apple, Samsung" value="<?= adminEscape($values['brand']) ?>">
             <div class="form-text">Tên hãng sản xuất.</div>
         </div>
-        <div class="col-md-6">
-            <label class="form-label" for="cpu">Bộ xử lý (CPU)</label>
-            <input class="form-control" id="cpu" name="cpu" maxlength="100" placeholder="Ví dụ: Intel Core i5-13400, Apple M3" value="<?= adminEscape($values['cpu']) ?>">
-            <div class="form-text">Dành cho máy tính/điện thoại; không áp dụng thì để trống.</div>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label" for="ram">Bộ nhớ RAM</label>
-            <input class="form-control" id="ram" name="ram" maxlength="50" placeholder="Ví dụ: 8 GB, 16 GB" value="<?= adminEscape($values['ram']) ?>">
-            <div class="form-text">Dung lượng RAM, không phải dung lượng ổ cứng; không áp dụng thì để trống.</div>
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                <div>
+                    <label class="form-label mb-0">Thông số kỹ thuật</label>
+                    <div class="form-text">Thêm các cặp thông tin phù hợp với sản phẩm.</div>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" type="button" data-add-specification><i class="bi bi-plus-lg me-1"></i>Thêm dòng</button>
+            </div>
+            <div class="row g-2" data-specifications>
+                <?php foreach ($specifications as $specification): ?>
+                    <div class="col-12" data-specification-row>
+                        <div class="row g-2 align-items-start">
+                            <div class="col-md-5"><input class="form-control" name="specification_names[]" maxlength="100" placeholder="Tên thông số, ví dụ: Kích cỡ màn hình" value="<?= adminEscape($specification['name']) ?>" aria-label="Tên thông số"></div>
+                            <div class="col-md-6"><input class="form-control" name="specification_values[]" maxlength="2000" placeholder="Giá trị, ví dụ: 55 inch" value="<?= adminEscape($specification['value']) ?>" aria-label="Giá trị thông số"></div>
+                            <div class="col-md-1"><button class="btn btn-outline-danger w-100" type="button" data-remove-specification aria-label="Xóa dòng"><i class="bi bi-trash"></i></button></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
         <div class="col-12"><label class="form-label" for="description">Mô tả</label><textarea class="form-control" id="description" name="description" rows="4"><?= adminEscape($values['description']) ?></textarea></div>
         <div class="col-12">
@@ -141,4 +163,26 @@ adminHeader('Thêm sản phẩm');
     </div>
     <div class="d-flex gap-2 mt-4"><button class="btn btn-primary" type="submit">Lưu sản phẩm</button><a class="btn btn-outline-secondary" href="/Web/admin/products/index.php">Hủy</a></div>
 </form>
+<template id="specification-row-template">
+    <div class="col-12" data-specification-row>
+        <div class="row g-2 align-items-start">
+            <div class="col-md-5"><input class="form-control" name="specification_names[]" maxlength="100" placeholder="Tên thông số, ví dụ: Kích cỡ màn hình" aria-label="Tên thông số"></div>
+            <div class="col-md-6"><input class="form-control" name="specification_values[]" maxlength="2000" placeholder="Giá trị, ví dụ: 55 inch" aria-label="Giá trị thông số"></div>
+            <div class="col-md-1"><button class="btn btn-outline-danger w-100" type="button" data-remove-specification aria-label="Xóa dòng"><i class="bi bi-trash"></i></button></div>
+        </div>
+    </div>
+</template>
+<script>
+    const specificationRows = document.querySelector('[data-specifications]');
+    const specificationTemplate = document.getElementById('specification-row-template');
+    document.querySelector('[data-add-specification]').addEventListener('click', () => {
+        specificationRows.append(specificationTemplate.content.cloneNode(true));
+    });
+    specificationRows.addEventListener('click', (event) => {
+        const removeButton = event.target.closest('[data-remove-specification]');
+        if (removeButton) {
+            removeButton.closest('[data-specification-row]').remove();
+        }
+    });
+</script>
 <?php adminFooter(); ?>

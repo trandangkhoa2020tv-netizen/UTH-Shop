@@ -44,9 +44,12 @@ function validateAdminImageBatch($files, $maxFiles = 10, $maxTotalBytes = 314572
     }
 }
 
-function uploadAdminImage($file, $type) {
+function uploadAdminImage($file, $type, $orientation = null) {
     if (!in_array($type, ['products', 'banners'], true)) {
         throw new RuntimeException('Thư mục tải ảnh không hợp lệ.');
+    }
+    if ($type === 'banners' && !in_array($orientation, ['landscape', 'portrait'], true)) {
+        throw new RuntimeException('Vui lòng chọn đúng loại banner ngang hoặc dọc.');
     }
     if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
         if (isset($file['error']) && in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
@@ -69,8 +72,15 @@ function uploadAdminImage($file, $type) {
     if (!isset($extensions[$mime])) {
         throw new RuntimeException('Chỉ chấp nhận ảnh JPG, PNG, WEBP hoặc GIF.');
     }
-    if (getimagesize($file['tmp_name']) === false) {
+    $imageSize = getimagesize($file['tmp_name']);
+    if ($imageSize === false) {
         throw new RuntimeException('Tệp tải lên không phải là ảnh hợp lệ.');
+    }
+    if ($orientation === 'landscape' && $imageSize[0] <= $imageSize[1]) {
+        throw new RuntimeException('Banner nằm giữa phải là ảnh ngang (chiều rộng lớn hơn chiều cao).');
+    }
+    if ($orientation === 'portrait' && $imageSize[1] <= $imageSize[0]) {
+        throw new RuntimeException('Banner hai bên phải là ảnh dọc (chiều cao lớn hơn chiều rộng).');
     }
 
     $relativeDirectory = 'uploads/' . $type;
