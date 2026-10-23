@@ -123,7 +123,7 @@ Có thể cấu hình bằng biến môi trường `DB_HOST`, `DB_PORT`, `DB_NAM
 3. `database.sql` chỉ tạo cấu trúc; không xóa dữ liệu hay tạo tài khoản admin. Không import lại như cách cập nhật một database đang sử dụng. Sao lưu database trước mọi thao tác thay đổi schema.
 4. Nếu muốn có sản phẩm mẫu, import `database.seed.sql` sau schema. Đây là tùy chọn; script không tạo admin và chỉ thêm dữ liệu mẫu còn thiếu.
 
-Các migration của tính năng mới được chạy tự động khi ứng dụng khởi tạo. Để cấp quyền quản trị, đăng ký tài khoản trước rồi nhờ người có quyền database nâng vai trò tài khoản đó lên `admin`; không dùng tài khoản/mật khẩu mẫu được chia sẻ công khai.
+Các migration của tính năng mới được chạy tự động khi ứng dụng khởi tạo. Để cấp quyền quản trị, đăng ký tài khoản trước rồi nhờ người có quyền database nâng vai trò tài khoản đó lên `admin`. Database mẫu không tự tạo tài khoản admin.
 
 ### Bước 5: Truy cập website
 
@@ -131,6 +131,14 @@ Mở trình duyệt và truy cập:
 
 - **Website:** http://localhost/Web/
 - **Trang quản trị:** http://localhost/Web/admin/
+
+#### 🔐 Tài khoản mẫu
+
+| Vai trò | Email | Mật khẩu |
+|---|---|---|
+| Admin | `admin@gmail.com` | `123456` |
+
+*Đây là tài khoản phục vụ mục đích phát triển và kiểm thử. Không sử dụng mật khẩu mẫu trên môi trường thực tế.*
 
 *Đường dẫn có thể thay đổi tùy theo cấu trúc thư mục và cấu hình thực tế.*
 
