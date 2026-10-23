@@ -1,3 +1,27 @@
 <?php
-require_once __DIR__ . '/../bootstrap.php'; require_admin();if($_SERVER['REQUEST_METHOD']!=='POST'){http_response_code(405);exit('Method Not Allowed');}verify_csrf();$id=filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);if(!$id){set_flash('error','ID sản phẩm không hợp lệ.');header('Location: '.admin_url('products/index.php'));exit;}
-try{$check=$conn->prepare('SELECT COUNT(*) FROM order_items WHERE product_id=?');$check->execute([$id]);if((int)$check->fetchColumn()>0){set_flash('error','Không thể xóa sản phẩm đã xuất hiện trong đơn hàng. Bạn có thể chỉnh tồn kho về 0 thay thế.');}else{$st=$conn->prepare('DELETE FROM products WHERE id=?');$st->execute([$id]);set_flash($st->rowCount()?'success':'warning',$st->rowCount()?'Đã xóa sản phẩm.':'Sản phẩm không tồn tại.');}}catch(PDOException $e){set_flash('error','Không thể xóa sản phẩm lúc này.');}header('Location: '.admin_url('products/index.php'));exit;
+require_once dirname(__DIR__) . '/../config/database.php';
+require_once dirname(__DIR__) . '/../includes/functions.php';
+require_once dirname(__DIR__) . '/../includes/auth.php';
+require_once dirname(__DIR__) . '/../includes/flash.php';
+
+if (session_status() === PHP_SESSION_NONE) session_start();
+requireAdmin();
+
+$id = (int)($_GET['id'] ?? 0);
+$stmt = $conn->prepare("SELECT name, image FROM products WHERE id = ?");
+$stmt->execute([$id]);
+$product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($product) {
+    $conn->prepare("DELETE FROM products WHERE id = ?")->execute([$id]);
+    // Xóa file ảnh nếu có (chỉ xóa ảnh do admin upload, không xóa ảnh seed)
+    if (!empty($product['image']) && strpos($product['image'], 'product_') === 0) {
+        $imgPath = dirname(__DIR__, 2) . '/image/' . $product['image'];
+        if (file_exists($imgPath)) unlink($imgPath);
+    }
+    flashSuccess("Đã xóa sản phẩm \"{$product['name']}\".");
+} else {
+    flashError('Không tìm thấy sản phẩm.');
+}
+header('Location: /Web/admin/products/index.php');
+exit();
