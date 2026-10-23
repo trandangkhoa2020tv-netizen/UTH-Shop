@@ -1,6 +1,57 @@
 <?php
-require_once __DIR__ . '/../bootstrap.php'; require_admin();
-$q=trim($_GET['q']??''); $sql="SELECT c.id,c.name,c.description,c.created_at,(SELECT COUNT(*) FROM products p WHERE p.category_id=c.id) AS product_count FROM categories c"; $params=[];
-if($q!==''){ $sql.=" WHERE c.name LIKE ? OR c.description LIKE ?"; $params=["%$q%","%$q%"]; } $sql.=" ORDER BY c.id DESC"; $st=$conn->prepare($sql);$st->execute($params);$rows=$st->fetchAll(PDO::FETCH_ASSOC);
-admin_header('Quản lý danh mục'); ?>
-<div class="card"><div class="toolbar"><form class="search" method="get"><input class="form-control" name="q" placeholder="Tìm tên danh mục..." value="<?= h($q) ?>"><button class="btn" type="submit">Tìm kiếm</button><?php if($q!==''): ?><a class="btn btn-outline" href="<?= h(admin_url('categories/index.php')) ?>">Xóa lọc</a><?php endif; ?></form><a class="btn btn-success" href="<?= h(admin_url('categories/create.php')) ?>">+ Thêm danh mục</a></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Tên danh mục</th><th>Mô tả</th><th>Số sản phẩm</th><th>Ngày tạo</th><th>Thao tác</th></tr></thead><tbody><?php if(!$rows): ?><tr><td colspan="6" class="empty">Không tìm thấy danh mục nào.</td></tr><?php else: foreach($rows as $r): ?><tr><td><?= (int)$r['id'] ?></td><td><strong><?= h($r['name']) ?></strong></td><td><?= h($r['description']) ?></td><td><?= (int)$r['product_count'] ?></td><td><?= h($r['created_at']) ?></td><td><div class="actions"><a class="btn btn-small" href="<?= h(admin_url('categories/edit.php?id='.(int)$r['id'])) ?>">Sửa</a><form method="post" action="<?= h(admin_url('categories/delete.php')) ?>" onsubmit="return confirm('Bạn chắc chắn muốn xóa danh mục này? Sản phẩm sẽ không bị xóa nhưng không còn thuộc danh mục.');"><input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>"><input type="hidden" name="id" value="<?= (int)$r['id'] ?>"><button class="btn btn-danger btn-small" type="submit">Xóa</button></form></div></td></tr><?php endforeach; endif; ?></tbody></table></div></div><?php admin_footer(); ?>
+$pageTitle = 'Quản lý Danh mục';
+require_once dirname(__DIR__) . '/_layout.php';
+
+$categories = $conn->query("
+    SELECT c.*, COUNT(p.id) AS product_count
+    FROM categories c
+    LEFT JOIN products p ON p.category_id = c.id
+    GROUP BY c.id ORDER BY c.id DESC
+")->fetchAll(PDO::FETCH_ASSOC);
+?>
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-tags me-2 text-primary"></i>Danh mục sản phẩm</h5>
+    <a href="/Web/admin/categories/create.php" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Thêm danh mục
+    </a>
+</div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="px-4" style="width:60px">ID</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th class="text-center">Số SP</th>
+                    <th>Ngày tạo</th>
+                    <th class="text-center" style="width:120px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php if (empty($categories)): ?>
+                <tr><td colspan="6" class="text-center text-muted py-4">Chưa có danh mục nào</td></tr>
+            <?php else: foreach ($categories as $cat): ?>
+                <tr>
+                    <td class="px-4 text-muted"><?= $cat['id'] ?></td>
+                    <td class="fw-semibold"><?= htmlspecialchars($cat['name']) ?></td>
+                    <td class="text-muted small"><?= htmlspecialchars(truncate($cat['description'] ?? '', 60)) ?></td>
+                    <td class="text-center"><span class="badge bg-primary"><?= $cat['product_count'] ?></span></td>
+                    <td class="small text-muted"><?= formatDate($cat['created_at']) ?></td>
+                    <td class="text-center">
+                        <a href="/Web/admin/categories/edit.php?id=<?= $cat['id'] ?>" class="btn btn-sm btn-outline-warning py-0 me-1">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="/Web/admin/categories/delete.php?id=<?= $cat['id'] ?>"
+                           class="btn btn-sm btn-outline-danger py-0"
+                           onclick="return confirm('Xóa danh mục này?\nSản phẩm liên quan sẽ không còn danh mục.')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            <?php endforeach; endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php require_once dirname(__DIR__) . '/_layout_end.php'; ?>
