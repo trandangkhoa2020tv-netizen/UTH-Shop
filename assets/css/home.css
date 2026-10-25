@@ -302,6 +302,33 @@ body { background-color: #f8fafc !important; }
 .uth-more a:hover { border-color: #2563eb; background: #eff6ff; }
 .uth-empty { text-align: center; color: #64748b; padding: 60px 0; }
 
+@media (max-width: 1199.98px) {
+    .uth-banner-stage { display: block; }
+    .uth-side-banner,
+    .uth-side-banner-placeholder { display: none; }
+    .uth-carousel { max-width: 920px; margin-bottom: 24px; }
+    .uth-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+}
+
 @media (max-width: 767.98px) {
-    .uth-catalog-panel { padding: 14px; border-radius: 18px; }
+    .uth-container { padding-right: 12px; padding-left: 12px; }
+    .uth-promo-marquee { margin-top: 14px; margin-bottom: 18px; }
+    .uth-promo-marquee__track span { font-size: .85rem; }
+    .uth-banner-stage { margin-bottom: 20px; }
+    .uth-carousel { margin-bottom: 20px; border-radius: 12px; }
+    .uth-catalog-panel { padding: 12px; border-radius: 16px; }
+    .uth-cats { gap: 8px; margin-bottom: 20px; }
+    .uth-cat-link { min-height: 46px; padding-right: 12px; font-size: .85rem; }
+    .uth-cat-icon { flex-basis: 32px; width: 32px; height: 32px; font-size: 1rem; }
+    .uth-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .uth-card { border-radius: 12px; }
+    .uth-card-img img { padding: 8px; }
+    .uth-badge { top: 8px; left: 8px; padding: 3px 7px; font-size: .68rem; }
+    .uth-card-body { padding: .75rem; gap: .35rem; }
+    .uth-card-body h3 { font-size: .875rem; line-height: 1.4; }
+    .uth-desc { font-size: .78rem; line-height: 1.45; }
+    .uth-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+    .uth-price { font-size: .95rem; }
+    .uth-btn { min-height: 42px; padding: .45rem .3rem; font-size: .78rem; }
+    .uth-more { margin-top: 20px; }
 }

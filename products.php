@@ -216,7 +216,7 @@ require_once __DIR__ . '/includes/header.php';
                 $imagePath = getProductImage($product['image'] ?? '');
                 ?>
 
-                <div class="col-6 col-md-4 col-lg-3">
+                <div class="col-6 col-md-4 col-xl-3">
                     <article class="product-card">
                         <a class="product-card__img-wrap d-block" href="/Web/product_detail.php?id=<?php echo (int)$product['id']; ?>">
                             <img src="<?php echo e($imagePath); ?>"

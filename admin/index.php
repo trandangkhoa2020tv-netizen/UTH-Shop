@@ -60,7 +60,7 @@ adminHeader('Quản trị cửa hàng');
                 <span class="admin-stat-icon mb-3"><i class="bi bi-lightning-charge"></i></span>
                 <h2 class="h5 fw-bold">Truy cập nhanh</h2>
                 <p class="small text-secondary">Mở cửa hàng để kiểm tra nội dung khách hàng đang thấy.</p>
-                <a class="btn btn-outline-primary w-100" href="/Web/index.php" target="_blank" rel="noopener">Xem cửa hàng</a>
+                <a class="btn btn-outline-primary w-100" href="/Web/index.php">Xem cửa hàng</a>
                 <a class="btn btn-outline-secondary w-100 mt-2" href="/Web/admin/users/index.php">Quản lý người dùng</a>
             </div>
         </section>

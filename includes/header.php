@@ -45,7 +45,7 @@ $cartCount = getCartCount();
 <body>
 
 <!-- ===================== NAVBAR ===================== -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top" id="main-navbar">
+<nav class="navbar navbar-expand-xl navbar-light bg-white sticky-top" id="main-navbar">
     <div class="container">
 
         <!-- LOGO -->
@@ -78,13 +78,13 @@ $cartCount = getCartCount();
             </ul>
 
             <!-- Search form -->
-            <form class="d-flex me-3" action="/Web/products.php" method="GET" role="search" id="search-form">
+            <form class="d-flex me-3 desktop-search-form" action="/Web/products.php" method="GET" role="search" id="search-form">
                 <div class="input-group">
                     <input class="form-control form-control-sm border-end-0"
                            type="search" name="q"
                            placeholder="Tìm sản phẩm..."
                            value="<?= htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                           aria-label="Tìm kiếm sản phẩm" id="search-input">
+                           aria-label="Tìm kiếm sản phẩm" id="search-input" data-search-input>
                     <button class="btn btn-outline-primary btn-sm" type="submit" id="btn-search">
                         <i class="bi bi-search"></i>
                     </button>
@@ -96,8 +96,9 @@ $cartCount = getCartCount();
 
                 <!-- Giỏ hàng -->
                 <li class="nav-item">
-                    <a class="nav-link position-relative" href="/Web/cart.php" id="cart-link" title="Giỏ hàng">
+                    <a class="nav-link d-flex align-items-center position-relative" href="/Web/cart.php" id="cart-link" title="Giỏ hàng">
                         <i class="bi bi-cart3 fs-5"></i>
+                        <span class="d-inline d-xl-none ms-2">Giỏ hàng</span>
                         <?php if ($cartCount > 0): ?>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-badge">
                             <?= $cartCount ?>
@@ -112,7 +113,7 @@ $cartCount = getCartCount();
                     <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#"
                        id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle fs-5"></i>
-                        <span class="d-none d-lg-inline"><?= htmlspecialchars($_SESSION['user_name'] ?? 'Tài khoản', ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="navbar-user-label"><?= htmlspecialchars($_SESSION['user_name'] ?? 'Tài khoản', ENT_QUOTES, 'UTF-8') ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
                         <?php if (isAdmin()): ?>
@@ -162,6 +163,20 @@ $cartCount = getCartCount();
     </div><!-- /.container -->
 </nav>
 <!-- =================== END NAVBAR =================== -->
+
+<div class="mobile-search">
+    <div class="container">
+        <form class="mobile-search__form" action="/Web/products.php" method="GET" role="search" id="mobile-search-form">
+            <input class="form-control" type="search" name="q"
+                   placeholder="Tìm sản phẩm..."
+                   value="<?= htmlspecialchars($_GET['q'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                   aria-label="Tìm kiếm sản phẩm" id="mobile-search-input" data-search-input>
+            <button class="btn btn-primary" type="submit" aria-label="Tìm kiếm">
+                <i class="bi bi-search" aria-hidden="true"></i>
+            </button>
+        </form>
+    </div>
+</div>
 
 <!-- =================== FLASH MESSAGE =================== -->
 <div class="container mt-3" id="flash-container">

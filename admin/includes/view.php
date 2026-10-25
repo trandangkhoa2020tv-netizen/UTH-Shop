@@ -120,7 +120,7 @@ function adminHeader($title) {
                         ?>
                             <a class="nav-link <?= $isActive ? 'active' : '' ?>" href="<?= adminEscape($href) ?>"><i class="bi <?= adminEscape($icon) ?>"></i><?= adminEscape($label) ?></a>
                         <?php endforeach; ?>
-                        <a class="nav-link admin-store-link" href="/Web/index.php" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i>Xem cửa hàng</a>
+                        <a class="nav-link admin-store-link" href="/Web/index.php"><i class="bi bi-box-arrow-up-right"></i>Xem cửa hàng</a>
                     </div>
                     <form method="post" action="/Web/admin/logout.php" class="admin-logout-form">
                         <?= csrfInput() ?>

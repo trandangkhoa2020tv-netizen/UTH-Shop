@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentPath = window.location.pathname;
     document.querySelectorAll('#main-navbar .nav-link').forEach(function (link) {
         const href = link.getAttribute('href') || '';
-        if (href && currentPath.endsWith(href.split('/Web/')[1] || '')) {
+        if (href && href !== '#' && href.charAt(0) !== '#' &&
+            new URL(href, window.location.href).pathname === currentPath) {
             link.classList.add('active');
         }
     });
@@ -157,15 +158,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ----------------------------------------
     // 9. SEARCH INPUT — Focus animation
     // ----------------------------------------
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
+    document.querySelectorAll('[data-search-input]').forEach(function (searchInput) {
         searchInput.addEventListener('focus', function () {
             this.parentElement.classList.add('shadow-sm');
         });
         searchInput.addEventListener('blur', function () {
             this.parentElement.classList.remove('shadow-sm');
         });
-    }
+    });
 
     // ----------------------------------------
     // 11. HOMEPAGE BANNER CAROUSEL
