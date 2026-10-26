@@ -50,10 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <main class="auth-page admin-auth-page">
         <section class="auth-card admin-auth-card">
-            <a class="auth-brand admin-auth-brand" href="/Web/index.php">
-                <span class="auth-brand__icon"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i></span>
-                <span>UTH <strong>Shop</strong></span>
-            </a>
             <div class="auth-card__heading">
                 <span class="auth-card__eyebrow">KHU VỰC QUẢN TRỊ</span>
                 <h1 class="h2" id="admin-login-title">Đăng nhập quản trị</h1>

@@ -13,5 +13,5 @@ if (!verifyCsrfToken((string)($_POST['csrf_token'] ?? ''))) {
 }
 
 logoutUser();
-header('Location: /Web/admin/login.php');
+header('Location: /Web/admin/index.php');
 exit;

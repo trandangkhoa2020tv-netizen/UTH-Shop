@@ -69,22 +69,7 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <div class="auth-page">
-    <section class="auth-layout" aria-labelledby="register-title">
-        <div class="auth-intro">
-            <a class="auth-brand" href="/Web/index.php">
-                <span class="auth-brand__icon"><i class="bi bi-bag-heart-fill" aria-hidden="true"></i></span>
-                <span>UTH <strong>Shop</strong></span>
-            </a>
-            <span class="auth-kicker">BẮT ĐẦU MUA SẮM</span>
-            <h1>Tạo tài khoản<br>của riêng bạn.</h1>
-            <p>Đăng ký nhanh chóng để đặt hàng và theo dõi đơn hàng của bạn tại UTH Shop.</p>
-            <div class="auth-benefits">
-                <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Lưu thông tin giao hàng</span>
-                <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Theo dõi lịch sử đơn hàng</span>
-                <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Mua sắm thuận tiện hơn</span>
-            </div>
-        </div>
-
+    <section class="auth-layout auth-layout--register" aria-labelledby="register-title">
         <div class="auth-card">
             <div class="auth-card__heading">
                 <span class="auth-card__eyebrow">TÀI KHOẢN KHÁCH HÀNG</span>

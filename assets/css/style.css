@@ -608,10 +608,24 @@ h1, h2, h3, h4, h5, h6 {
     background: #fff;
     box-shadow: 0 20px 55px rgba(15, 23, 42, .10);
 }
+.auth-layout--login {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.auth-layout--register {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.auth-layout--login .auth-card,
+.auth-layout--register .auth-card { max-width: 470px; }
 .admin-auth-page { padding-top: 2rem; padding-bottom: 2rem; }
 .admin-auth-card { max-width: 460px; }
-.admin-auth-brand { margin-bottom: 2rem; }
+.admin-auth-card .auth-card__heading { text-align: center; }
 .auth-card__heading { margin-bottom: 1.5rem; }
+.auth-layout--login .auth-card__heading,
+.auth-layout--register .auth-card__heading { text-align: center; }
 .auth-card__heading h2 {
     margin: .45rem 0 .25rem;
     color: #0f172a;
