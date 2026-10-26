@@ -30,6 +30,12 @@ function expectException(callable $callback, string $message): void
 $passwordHash = hashPassword('correct horse battery staple');
 check(verifyPassword('correct horse battery staple', $passwordHash), 'Password hashes should verify.');
 check(!verifyPassword('wrong password', $passwordHash), 'Incorrect passwords should not verify.');
+check(meetsPasswordPolicy('Strongpass1!'), 'Password policy should accept passwords with uppercase and special characters.');
+check(meetsPasswordPolicy('MậtKhẩuMới!'), 'Password policy should count Unicode characters and uppercase letters.');
+check(!meetsPasswordPolicy('short!A'), 'Password policy should reject passwords shorter than eight characters.');
+check(!meetsPasswordPolicy('lowercase1!'), 'Password policy should require an uppercase letter.');
+check(!meetsPasswordPolicy('Uppercase1'), 'Password policy should require a special character.');
+check(!meetsPasswordPolicy(str_repeat('A', 72) . '!'), 'Password policy should enforce the bcrypt byte limit.');
 
 loginUser([
     'id' => 42,

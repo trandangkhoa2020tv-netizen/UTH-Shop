@@ -117,6 +117,16 @@ function logoutUser() {
 // ----------------------------
 
 /**
+ * Kiểm tra mật khẩu có tối thiểu 8 ký tự, chữ hoa, ký tự đặc biệt và không quá 72 byte.
+ * @param string $password Mật khẩu dạng plaintext
+ * @return bool
+ */
+function meetsPasswordPolicy($password) {
+    return strlen($password) <= 72
+        && preg_match('/\A(?=.{8,}\z)(?=.*\p{Lu})(?=.*[^\p{L}\p{N}]).+\z/us', $password) === 1;
+}
+
+/**
  * Hash mật khẩu trước khi lưu vào database
  * @param string $password Mật khẩu dạng plaintext
  * @return string

@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/auth.php';
 
 if (!empty($_SESSION['user_id'])) {
     header('Location: index.php');
@@ -29,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100) {
         $errors[] = 'Vui lòng nhập địa chỉ email hợp lệ (tối đa 100 ký tự).';
     }
-    if (strlen($password) < 6) {
-        $errors[] = 'Mật khẩu cần có ít nhất 6 ký tự.';
+    if (!meetsPasswordPolicy($password)) {
+        $errors[] = 'Mật khẩu phải có ít nhất 8 ký tự, gồm ít nhất 1 chữ hoa và 1 ký tự đặc biệt, đồng thời không quá 72 byte.';
     }
     if ($password !== $confirm) {
         $errors[] = 'Mật khẩu xác nhận không khớp.';
@@ -109,12 +110,13 @@ require_once __DIR__ . '/includes/header.php';
                     <label class="form-label" for="password">Mật khẩu</label>
                     <div class="auth-input-wrap">
                         <i class="bi bi-lock" aria-hidden="true"></i>
-                        <input type="password" class="form-control" id="password" name="password" required minlength="6"
-                               autocomplete="new-password" placeholder="Ít nhất 6 ký tự">
+                        <input type="password" class="form-control" id="password" name="password" required minlength="8" maxlength="72"
+                               autocomplete="new-password" placeholder="Ít nhất 8 ký tự, có chữ hoa và ký tự đặc biệt">
                         <button class="auth-password-toggle" type="button" data-password-toggle="password" aria-label="Hiện mật khẩu">
                             <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
                     </div>
+                    <div class="form-text">Mật khẩu cần có ít nhất 8 ký tự, 1 chữ hoa và 1 ký tự đặc biệt.</div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label" for="confirm_password">Nhập lại mật khẩu</label>

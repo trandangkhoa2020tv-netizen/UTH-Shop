@@ -55,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!password_verify($passwordValues['current_password'], $user['password'])) {
             $passwordErrors[] = 'Mật khẩu hiện tại không chính xác.';
         }
-        if (strlen($passwordValues['new_password']) < 6 || strlen($passwordValues['new_password']) > 72) {
-            $passwordErrors[] = 'Mật khẩu mới phải có từ 6 đến 72 byte.';
+        if (!meetsPasswordPolicy($passwordValues['new_password'])) {
+            $passwordErrors[] = 'Mật khẩu mới phải có ít nhất 8 ký tự, gồm ít nhất 1 chữ hoa và 1 ký tự đặc biệt, đồng thời không quá 72 byte.';
         }
         if ($passwordValues['new_password'] !== $passwordValues['confirm_password']) {
             $passwordErrors[] = 'Mật khẩu xác nhận không khớp.';
@@ -256,19 +256,19 @@ require_once __DIR__ . '/includes/header.php';
                             <div class="auth-input-wrap">
                                 <i class="bi bi-shield-lock" aria-hidden="true"></i>
                                 <input class="form-control" type="password" id="new_password" name="new_password"
-                                       minlength="6" maxlength="72" autocomplete="new-password" required>
+                                       minlength="8" maxlength="72" autocomplete="new-password" required>
                                 <button class="auth-password-toggle" type="button" data-password-toggle="new_password" aria-label="Hiện mật khẩu">
                                     <i class="bi bi-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
-                            <div class="form-text">Từ 6 đến 72 byte.</div>
+                            <div class="form-text">Ít nhất 8 ký tự, có 1 chữ hoa và 1 ký tự đặc biệt; tối đa 72 byte.</div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label" for="confirm_password">Nhập lại mật khẩu mới</label>
                             <div class="auth-input-wrap">
                                 <i class="bi bi-shield-check" aria-hidden="true"></i>
                                 <input class="form-control" type="password" id="confirm_password" name="confirm_password"
-                                       minlength="6" maxlength="72" autocomplete="new-password" required>
+                                       minlength="8" maxlength="72" autocomplete="new-password" required>
                                 <button class="auth-password-toggle" type="button" data-password-toggle="confirm_password" aria-label="Hiện mật khẩu">
                                     <i class="bi bi-eye" aria-hidden="true"></i>
                                 </button>
