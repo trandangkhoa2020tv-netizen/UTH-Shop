@@ -151,7 +151,7 @@ Mở trình duyệt và truy cập:
 
 | Vai trò | Email | Mật khẩu |
 |---|---|---|
-| Admin | `admin@gmail.com` | `123456` |
+| Admin | `admin@gmail.com` | `Admin#123456` |
 
 *Đây là tài khoản phục vụ mục đích phát triển và kiểm thử. Không sử dụng mật khẩu mẫu trên môi trường thực tế.*
 
