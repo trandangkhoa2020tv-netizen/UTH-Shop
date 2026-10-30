@@ -71,10 +71,9 @@ Web/
 │       └── main.js                     # Tương tác giao diện như giỏ hàng, menu và nút lên đầu trang
 ├── config/
 │   ├── database.php                    # Kết nối MySQL dùng bởi ứng dụng (mặc định localhost:3307)
-│   ├── database.local.php.example      # Mẫu cấu hình MySQL cho môi trường local
+│   ├── database.local.php              # Cấu hình MySQL cho môi trường local
 │   ├── database_connection.php         # Đọc cấu hình và mở kết nối PDO
-│   ├── database_hosting.php            # Kết nối MySQL cho môi trường hosting
-│   └── database_hosting.local.php.example # Mẫu cấu hình kết nối hosting
+│   └── database_hosting.php            # Kết nối MySQL cho môi trường hosting
 ├── image/                              # Ảnh tĩnh: logo, banner và ảnh sản phẩm mẫu
 ├── includes/
 │   ├── auth.php                        # Session, đăng nhập/đăng xuất và phân quyền
@@ -127,10 +126,11 @@ C:\xampp\htdocs\Web\
 ```
 
 ### Bước 3: Cấu hình kết nối database
-Có thể cấu hình bằng biến môi trường `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, hoặc tạo file local không được Git theo dõi. Cấu hình XAMPP mặc định dùng MySQL tại `localhost:3307`:
+Có thể cấu hình bằng biến môi trường `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, hoặc chỉnh sửa file local cấu hình. Cấu hình XAMPP mặc định dùng MySQL tại `localhost:3307`:
 
-1. Sao chép `config/database.local.php.example` thành `config/database.local.php`.
-2. Điền thông tin kết nối MySQL trong file local. Không commit file này hoặc mật khẩu database.
+1. Mở file `config/database.local.php`.
+2. Điền thông tin kết nối MySQL vào các khóa `host`, `port`, `dbname`, `username`, `password`.
+3. Không commit file này hoặc mật khẩu database nếu đang làm việc ở môi trường thực tế.
 
 ### Bước 4: Tạo database và bảng
 1. Tạo database rỗng bằng phpMyAdmin hoặc MySQL.
